@@ -90,8 +90,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         child: loadLogo(),
       ),
       buildTip(context),
-      if (!isOutgoingOnly) buildIDBoard(context),
-      if (!isOutgoingOnly) buildPasswordBoard(context),
+      // if (!isOutgoingOnly) buildIDBoard(context),
+      // if (!isOutgoingOnly) buildPasswordBoard(context),
       FutureBuilder<Widget>(
         future: Future.value(
             Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
@@ -398,25 +398,25 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         children: [
           Column(
             children: [
-              if (!isOutgoingOnly)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    translate("Your Desktop"),
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
+              // if (!isOutgoingOnly)
+              //   Align(
+              //     alignment: Alignment.centerLeft,
+              //     child: Text(
+              //       translate("Your Desktop"),
+              //       style: Theme.of(context).textTheme.titleLarge,
+              //     ),
+              //   ),
             ],
           ),
           SizedBox(
             height: 10.0,
           ),
-          if (!isOutgoingOnly)
-            Text(
-              translate("desk_tip"),
-              overflow: TextOverflow.clip,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+          // if (!isOutgoingOnly)
+          //   Text(
+          //     translate("desk_tip"),
+          //     overflow: TextOverflow.clip,
+          //     style: Theme.of(context).textTheme.bodySmall,
+          //   ),
           if (isOutgoingOnly)
             Text(
               translate("outgoing_only_desk_tip"),

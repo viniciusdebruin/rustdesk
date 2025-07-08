@@ -168,7 +168,9 @@ class _DropDownAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return actions[0];
+    // Comentado para desabilitar o modo servidor/mobile
+    // return actions[0];
+    return SizedBox.shrink();
   }
 }
 
@@ -648,9 +650,8 @@ class ConnectionManager extends StatelessWidget {
     return Column(
         children: serverModel.clients
             .map((client) => PaddingCard(
-                title: translate(client.isFileTransfer
-                    ? "Transfer file"
-                    : "Share screen"),
+                title: translate(
+                    client.isFileTransfer ? "Transfer file" : "Share screen"),
                 titleIcon: client.isFileTransfer
                     ? Icon(Icons.folder_outlined)
                     : Icon(Icons.mobile_screen_share),
