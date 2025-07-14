@@ -41,7 +41,7 @@ jobs:
       run: flutter build windows --release
 
     - name: Upload Windows Build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: de-bruin-sistemas-windows
         path: build/windows/x64/runner/Release/
@@ -75,7 +75,7 @@ jobs:
       run: flutter build apk --release
 
     - name: Upload Android APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: de-bruin-sistemas-android
         path: build/app/outputs/flutter-apk/app-release.apk
@@ -103,7 +103,7 @@ jobs:
       run: flutter build macos --release
 
     - name: Upload macOS Build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: de-bruin-sistemas-macos
         path: build/macos/Build/Products/Release/
@@ -136,7 +136,7 @@ jobs:
       run: flutter build linux --release
 
     - name: Upload Linux Build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: de-bruin-sistemas-linux
         path: build/linux/x64/release/bundle/
