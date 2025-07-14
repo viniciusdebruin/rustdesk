@@ -150,6 +150,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/images/sua_empresa_logo.png
 
   fonts:
     - family: GestureIcons
