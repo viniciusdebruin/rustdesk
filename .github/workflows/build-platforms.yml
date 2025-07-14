@@ -1,4 +1,4 @@
-name: Build de Bruin Sistemas - TODAS PLATAFORMAS
+name: de bruin personalização
 on:
   workflow_dispatch:
     inputs:
