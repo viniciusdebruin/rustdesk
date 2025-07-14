@@ -5,62 +5,60 @@ on:
       platform:
         description: 'Platform to build'
         required: true
-        default: 'all'
+        default: 'android'
         type: choice
         options:
-        - all
-        - windows
         - android
-        - macos
         - linux
+        - macos
   push:
     branches: [ main ]
     paths: ['flutter/lib/**', 'flutter/pubspec.yaml']
 
 jobs:
-  build-windows:
-    if: github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all' || github.event_name == 'push'
-    runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: flutter
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
-        fetch-depth: 0
+  # build-windows:
+  #   if: github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all' || github.event_name == 'push'
+  #   runs-on: windows-latest
+  #   defaults:
+  #     run:
+  #       working-directory: flutter
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v4
+  #     with:
+  #       submodules: recursive
+  #       fetch-depth: 0
 
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
+  #   - name: Setup Flutter
+  #     uses: subosito/flutter-action@v2
+  #     with:
+  #       channel: 'stable'
 
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        toolchain: stable
+  #   - name: Install Rust
+  #     uses: dtolnay/rust-toolchain@stable
+  #     with:
+  #       toolchain: stable
 
-    - name: Setup Rust cache
-      uses: Swatinem/rust-cache@v2
+  #   - name: Setup Rust cache
+  #     uses: Swatinem/rust-cache@v2
 
-    - name: Install dependencies
-      run: |
-        flutter doctor -v
-        flutter clean
-        flutter pub get
+  #   - name: Install dependencies
+  #     run: |
+  #       flutter doctor -v
+  #       flutter clean
+  #       flutter pub get
 
-    - name: Build Windows
-      run: flutter build windows --release --verbose
+  #   - name: Build Windows
+  #     run: flutter build windows --release --verbose
 
-    - name: Upload Windows Build
-      uses: actions/upload-artifact@v4
-      with:
-        name: de-bruin-sistemas-windows
-        path: flutter/build/windows/x64/runner/Release/
+  #   - name: Upload Windows Build
+  #     uses: actions/upload-artifact@v4
+  #     with:
+  #       name: de-bruin-sistemas-windows
+  #       path: flutter/build/windows/x64/runner/Release/
 
   build-android:
-    if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' || github.event_name == 'push'
+    if: github.event.inputs.platform == 'android' || github.event_name == 'push'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -102,7 +100,7 @@ jobs:
         path: flutter/build/app/outputs/flutter-apk/app-release.apk
 
   build-macos:
-    if: github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'
+    if: github.event.inputs.platform == 'macos'
     runs-on: macos-latest
     steps:
     - name: Checkout
@@ -130,7 +128,7 @@ jobs:
         path: build/macos/Build/Products/Release/
 
   build-linux:
-    if: github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all'
+    if: github.event.inputs.platform == 'linux'
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
