@@ -5,9 +5,10 @@ on:
       platform:
         description: 'Platform to build'
         required: true
-        default: 'android'
+        default: 'windows'
         type: choice
         options:
+        - windows
         - android
         - linux
         - macos
@@ -16,49 +17,60 @@ on:
     paths: ['flutter/lib/**', 'flutter/pubspec.yaml']
 
 jobs:
-  # build-windows:
-  #   if: github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all' || github.event_name == 'push'
-  #   runs-on: windows-latest
-  #   defaults:
-  #     run:
-  #       working-directory: flutter
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v4
-  #     with:
-  #       submodules: recursive
-  #       fetch-depth: 0
+  build-windows:
+    if: github.event.inputs.platform == 'windows' || github.event_name == 'push'
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: flutter
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
 
-  #   - name: Setup Flutter
-  #     uses: subosito/flutter-action@v2
-  #     with:
-  #       channel: 'stable'
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.22.0'
+        channel: 'stable'
 
-  #   - name: Install Rust
-  #     uses: dtolnay/rust-toolchain@stable
-  #     with:
-  #       toolchain: stable
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: stable
 
-  #   - name: Setup Rust cache
-  #     uses: Swatinem/rust-cache@v2
+    - name: Setup Rust cache
+      uses: Swatinem/rust-cache@v2
 
-  #   - name: Install dependencies
-  #     run: |
-  #       flutter doctor -v
-  #       flutter clean
-  #       flutter pub get
+    - name: Fix nullable issues
+      shell: bash
+      run: |
+        # Corrigir erro de bool? para bool
+        sed -i 's/bool? /bool /g' lib/common/widgets/toolbar.dart
+        sed -i 's/= null;/= false;/g' lib/common/widgets/toolbar.dart
+        
+        # Verificar se RustdeskImpl existe
+        find . -name "*.dart" -exec grep -l "RustdeskImpl" {} \; || echo "RustdeskImpl not found"
 
-  #   - name: Build Windows
-  #     run: flutter build windows --release --verbose
+    - name: Install dependencies
+      run: |
+        flutter doctor -v
+        flutter clean
+        flutter pub get
 
-  #   - name: Upload Windows Build
-  #     uses: actions/upload-artifact@v4
-  #     with:
-  #       name: de-bruin-sistemas-windows
-  #       path: flutter/build/windows/x64/runner/Release/
+    - name: Build Windows
+      run: flutter build windows --release
+
+    - name: Upload Windows Build
+      uses: actions/upload-artifact@v4
+      with:
+        name: de-bruin-sistemas-windows
+        path: flutter/build/windows/x64/runner/Release/
 
   build-android:
-    if: github.event.inputs.platform == 'android' || github.event_name == 'push'
+    if: github.event.inputs.platform == 'android'
     runs-on: ubuntu-latest
     defaults:
       run:
