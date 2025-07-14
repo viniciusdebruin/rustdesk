@@ -15,12 +15,15 @@ on:
         - linux
   push:
     branches: [ main ]
-    paths: ['lib/**', 'pubspec.yaml']
+    paths: ['flutter/lib/**', 'flutter/pubspec.yaml']
 
 jobs:
   build-windows:
     if: github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all' || github.event_name == 'push'
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: flutter
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -55,11 +58,14 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: de-bruin-sistemas-windows
-        path: build/windows/x64/runner/Release/
+        path: flutter/build/windows/x64/runner/Release/
 
   build-android:
     if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' || github.event_name == 'push'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: flutter
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -95,7 +101,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: de-bruin-sistemas-android
-        path: build/app/outputs/flutter-apk/app-release.apk
+        path: flutter/build/app/outputs/flutter-apk/app-release.apk
 
   build-macos:
     if: github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'
