@@ -1,22 +1,4 @@
-Perfeito! Vejo que você está na pasta .github/workflows/ e tem vários arquivos de workflow. Vou te ajudar a configurar builds específicos para cada plataforma.
-🎯 Vamos modificar os arquivos existentes:
-1. Modificar flutter-nightly.yml (desabilitar por enquanto):
-yamlname: Flutter Nightly Build
-on:
-  # schedule:
-  #   - cron: "0 0 * * *"  # Comentar para desabilitar builds automáticos
-  workflow_dispatch:  # Manter apenas trigger manual
-
-jobs:
-  run-flutter-nightly-build:
-    uses: ./.github/workflows/flutter-build.yml
-    secrets: inherit
-    with:
-      upload-artifact: true
-      upload-tag: "nightly"
-2. Criar novo arquivo build-platforms.yml:
-Clique em "Add file" > "Create new file" e nomeie como build-platforms.yml:
-yamlname: Build de Bruin Sistemas
+name: Build de Bruin Sistemas
 on:
   workflow_dispatch:
     inputs:
