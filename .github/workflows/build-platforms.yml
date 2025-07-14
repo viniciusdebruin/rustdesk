@@ -14,7 +14,7 @@ on:
         - macos
         - linux
   push:
-    branches: [ main, master ]
+    branches: [ main ]
     paths: ['lib/**', 'pubspec.yaml']
 
 jobs:
