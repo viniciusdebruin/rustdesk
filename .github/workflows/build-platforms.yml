@@ -1,0 +1,160 @@
+Perfeito! Vejo que você está na pasta .github/workflows/ e tem vários arquivos de workflow. Vou te ajudar a configurar builds específicos para cada plataforma.
+🎯 Vamos modificar os arquivos existentes:
+1. Modificar flutter-nightly.yml (desabilitar por enquanto):
+yamlname: Flutter Nightly Build
+on:
+  # schedule:
+  #   - cron: "0 0 * * *"  # Comentar para desabilitar builds automáticos
+  workflow_dispatch:  # Manter apenas trigger manual
+
+jobs:
+  run-flutter-nightly-build:
+    uses: ./.github/workflows/flutter-build.yml
+    secrets: inherit
+    with:
+      upload-artifact: true
+      upload-tag: "nightly"
+2. Criar novo arquivo build-platforms.yml:
+Clique em "Add file" > "Create new file" e nomeie como build-platforms.yml:
+yamlname: Build de Bruin Sistemas
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Platform to build'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - windows
+        - android
+        - macos
+        - linux
+  push:
+    branches: [ main, master ]
+    paths: ['lib/**', 'pubspec.yaml']
+
+jobs:
+  build-windows:
+    if: github.event.inputs.platform == 'windows' || github.event.inputs.platform == 'all' || github.event_name == 'push'
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build Windows
+      run: flutter build windows --release
+
+    - name: Upload Windows Build
+      uses: actions/upload-artifact@v3
+      with:
+        name: de-bruin-sistemas-windows
+        path: build/windows/x64/runner/Release/
+
+  build-android:
+    if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build Android APK
+      run: flutter build apk --release
+
+    - name: Upload Android APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: de-bruin-sistemas-android
+        path: build/app/outputs/flutter-apk/app-release.apk
+
+  build-macos:
+    if: github.event.inputs.platform == 'macos' || github.event.inputs.platform == 'all'
+    runs-on: macos-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build macOS
+      run: flutter build macos --release
+
+    - name: Upload macOS Build
+      uses: actions/upload-artifact@v3
+      with:
+        name: de-bruin-sistemas-macos
+        path: build/macos/Build/Products/Release/
+
+  build-linux:
+    if: github.event.inputs.platform == 'linux' || github.event.inputs.platform == 'all'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: Install Linux dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.16.0'
+        channel: 'stable'
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build Linux
+      run: flutter build linux --release
+
+    - name: Upload Linux Build
+      uses: actions/upload-artifact@v3
+      with:
+        name: de-bruin-sistemas-linux
+        path: build/linux/x64/release/bundle/
