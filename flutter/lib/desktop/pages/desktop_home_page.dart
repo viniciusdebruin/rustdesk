@@ -56,23 +56,377 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   final GlobalKey _childKey = GlobalKey();
 
   @override
+  // Widget build(BuildContext context) {
+  //   super.build(context);
+  //   final isIncomingOnly = bind.isIncomingOnly();
+  //   return _buildBlock(
+  //       child: Row(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       buildLeftPane(context),
+  //       // if (!isIncomingOnly) const VerticalDivider(width: 1),
+  //       // if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
+  //     ],
+  //   ));
+  // }
+
   Widget build(BuildContext context) {
     super.build(context);
     final isIncomingOnly = bind.isIncomingOnly();
     return _buildBlock(
-        child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          buildLeftPane(context),
+          if (!isIncomingOnly) const VerticalDivider(width: 1),
+          if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
+        ],
+      ),
+    );
+  }
+
+  Widget buildCustomLayout(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 40),
+
+            // Logo da sua empresa
+            Container(
+              padding: EdgeInsets.all(30),
+              child: buildCustomLogo(),
+            ),
+
+            SizedBox(height: 30),
+
+            // ID do Servidor
+            Container(
+              width: double.infinity,
+              constraints: BoxConstraints(maxWidth: 400),
+              margin: EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                    color: MyTheme.accent.withOpacity(0.3), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: buildIDBoardCustom(context),
+            ),
+
+            // Senha
+            Container(
+              width: double.infinity,
+              constraints: BoxConstraints(maxWidth: 400),
+              margin: EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                    color: MyTheme.accent.withOpacity(0.3), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: buildPasswordBoardCustom(context),
+            ),
+
+            SizedBox(height: 20),
+
+            // Status do serviço
+            if (bind.isIncomingOnly())
+              OnlineStatusWidget(
+                onSvcStatusChanged: () {
+                  if (isInHomePage()) {
+                    Future.delayed(Duration(milliseconds: 300), () {
+                      _updateWindowSize();
+                    });
+                  }
+                },
+              ),
+
+            SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+// Método para seu logo personalizado
+  Widget buildCustomLogo() {
+    return Column(
       children: [
-        buildLeftPane(context),
-        if (!isIncomingOnly) const VerticalDivider(width: 1),
-        if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
+        // Opção 1: Logo a partir de arquivo de imagem
+        Container(
+          width: 200,
+          height: 200,
+          child: Image.asset(
+            'assets/images/sua_empresa_logo.png', // Coloque seu logo aqui
+            fit: BoxFit.contain,
+          ),
+        ),
+
+        // Opção 2: Logo com texto estilizado (caso não tenha imagem)
+        // Container(
+        //   padding: EdgeInsets.all(30),
+        //   decoration: BoxDecoration(
+        //     gradient: LinearGradient(
+        //       colors: [
+        //         Color(0xFF1E88E5), // Cores da sua marca
+        //         Color(0xFF42A5F5),
+        //       ],
+        //       begin: Alignment.topLeft,
+        //       end: Alignment.bottomRight,
+        //     ),
+        //     borderRadius: BorderRadius.circular(20),
+        //     boxShadow: [
+        //       BoxShadow(
+        //         color: Colors.blue.withOpacity(0.3),
+        //         blurRadius: 15,
+        //         offset: Offset(0, 8),
+        //       ),
+        //     ],
+        //   ),
+        //   child: Text(
+        //     'SUA EMPRESA',
+        //     style: TextStyle(
+        //       fontSize: 32,
+        //       fontWeight: FontWeight.bold,
+        //       color: Colors.white,
+        //       letterSpacing: 2,
+        //     ),
+        //   ),
+        // ),
+
+        SizedBox(height: 20),
+
+        // Nome da empresa
+        Text(
+          'de Bruin Sistemas',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).textTheme.titleLarge?.color,
+          ),
+        ),
+
+        SizedBox(height: 10),
+
+        // Slogan ou descrição
+        Text(
+          'Acesso Remoto Seguro',
+          style: TextStyle(
+            fontSize: 16,
+            color:
+                Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7),
+          ),
+        ),
       ],
-    ));
+    );
+  }
+
+// ID Board customizado mantendo funcionalidade original
+  Widget buildIDBoardCustom(BuildContext context) {
+    final model = gFFI.serverModel;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              translate("ID"),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).textTheme.titleLarge?.color,
+              ),
+            ),
+            // Botão de configurações (igual ao original)
+            buildPopupMenu(context),
+          ],
+        ),
+        SizedBox(height: 15),
+        GestureDetector(
+          onDoubleTap: () {
+            Clipboard.setData(ClipboardData(text: model.serverId.text));
+            showToast(translate("Copied"));
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: MyTheme.accent, width: 2),
+            ),
+            child: Center(
+              child: Text(
+                model.serverId.text,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
+                  letterSpacing: 2,
+                ),
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: 8),
+        Text(
+          translate("Duplo clique para copiar"),
+          style: TextStyle(
+            fontSize: 12,
+            color:
+                Theme.of(context).textTheme.bodySmall?.color?.withOpacity(0.6),
+          ),
+        ),
+      ],
+    );
+  }
+
+// Password Board customizado mantendo funcionalidade original
+  Widget buildPasswordBoardCustom(BuildContext context) {
+    return ChangeNotifierProvider.value(
+      value: gFFI.serverModel,
+      child: Consumer<ServerModel>(
+        builder: (context, model, child) {
+          final textColor = Theme.of(context).textTheme.titleLarge?.color;
+          final showOneTime = model.approveMode != 'click' &&
+              model.verificationMethod != kUsePermanentPassword;
+          RxBool refreshHover = false.obs;
+          RxBool editHover = false.obs;
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                translate("One-time Password"),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: textColor,
+                ),
+              ),
+              SizedBox(height: 15),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: MyTheme.accent, width: 2),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onDoubleTap: () {
+                          if (showOneTime) {
+                            Clipboard.setData(
+                                ClipboardData(text: model.serverPasswd.text));
+                            showToast(translate("Copied"));
+                          }
+                        },
+                        child: Center(
+                          child: Text(
+                            model.serverPasswd.text,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (showOneTime)
+                      Container(
+                        margin: EdgeInsets.only(left: 10),
+                        child: AnimatedRotationWidget(
+                          onPressed: () => bind.mainUpdateTemporaryPassword(),
+                          child: Tooltip(
+                            message: translate('Refresh Password'),
+                            child: Obx(() => Icon(
+                                  Icons.refresh,
+                                  color: refreshHover.value
+                                      ? textColor
+                                      : Color(0xFFDDDDDD),
+                                  size: 24,
+                                )),
+                          ),
+                          onHover: (value) => refreshHover.value = value,
+                        ),
+                      ),
+                    if (!bind.isDisableSettings())
+                      Container(
+                        margin: EdgeInsets.only(left: 10),
+                        child: InkWell(
+                          child: Tooltip(
+                            message: translate('Change Password'),
+                            child: Obx(() => Icon(
+                                  Icons.edit,
+                                  color: editHover.value
+                                      ? textColor
+                                      : Color(0xFFDDDDDD),
+                                  size: 24,
+                                )),
+                          ),
+                          onTap: () => DesktopSettingPage.switch2page(
+                              SettingsTabKey.safety),
+                          onHover: (value) => editHover.value = value,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                translate("Duplo clique para copiar"),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.color
+                      ?.withOpacity(0.6),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   Widget _buildBlock({required Widget child}) {
-    return buildRemoteBlock(
-        block: _block, mask: true, use: canBeBlocked, child: child);
+    // Antes:
+    // return buildRemoteBlock(
+    //     block: _block, mask: true, use: canBeBlocked, child: child);
+
+    // Depois (sem o Controle um Computador Remoto)
+    return Container(
+      key: _childKey,
+      child: child,
+    );
   }
 
   Widget buildLeftPane(BuildContext context) {
@@ -130,7 +484,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return ChangeNotifierProvider.value(
       value: gFFI.serverModel,
       child: Container(
-        width: isIncomingOnly ? 280.0 : 200.0,
+        //width: isIncomingOnly ? 280.0 : 200.0,
+        width: double.infinity,
         color: Theme.of(context).colorScheme.background,
         child: Stack(
           children: [
