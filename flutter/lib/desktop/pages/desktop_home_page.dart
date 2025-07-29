@@ -204,8 +204,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       SizedBox(height: 20),
       
       // ID e Senha com visual épico
-      if (!isOutgoingOnly) buildEpicIDBoard(context),
-      if (!isOutgoingOnly) buildEpicPasswordBoard(context),
+      if (!isOutgoingOnly) buildIDBoard(context),
+      if (!isOutgoingOnly) buildPasswordBoard(context),
       
       FutureBuilder<Widget>(
         future: Future.value(
@@ -319,8 +319,23 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
-  // ID Board épico
-  Widget buildEpicIDBoard(BuildContext context) {
+  buildRightPane(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.topRight,
+          radius: 2.0,
+          colors: [
+            Color(0xFF2F65BA).withOpacity(0.05),
+            Theme.of(context).scaffoldBackgroundColor,
+          ],
+        ),
+      ),
+      child: ConnectionPage(),
+    );
+  }
+
+  buildIDBoard(BuildContext context) {
     final model = gFFI.serverModel;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -446,8 +461,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
-  // Password Board épico
-  Widget buildEpicPasswordBoard(BuildContext context) {
+  buildPasswordBoard(BuildContext context) {
     return ChangeNotifierProvider.value(
         value: gFFI.serverModel,
         child: Consumer<ServerModel>(
@@ -457,7 +471,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         ));
   }
 
-  Widget buildPasswordBoard2(BuildContext context, ServerModel model) {
+  buildPasswordBoard2(BuildContext context, ServerModel model) {
     RxBool refreshHover = false.obs;
     RxBool editHover = false.obs;
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
@@ -614,30 +628,6 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
-  buildRightPane(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.topRight,
-          radius: 2.0,
-          colors: [
-            Color(0xFF2F65BA).withOpacity(0.05),
-            Theme.of(context).scaffoldBackgroundColor,
-          ],
-        ),
-      ),
-      child: ConnectionPage(),
-    );
-  }
-
-  buildIDBoard(BuildContext context) {
-    return buildEpicIDBoard(context);
-  }
-
-  buildPasswordBoard(BuildContext context) {
-    return buildEpicPasswordBoard(context);
-  }
-
   buildTip(BuildContext context) {
     final isOutgoingOnly = bind.isOutgoingOnly();
     return Padding(
@@ -760,8 +750,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
             help: 'Help',
-            link:
-                'https://rustdesk.com/docs/en/client/linux/#permissions-issue',
+            link: 'https://rustdesk.com/docs/en/client/linux/#permissions-issue',
             closeButton: true,
             closeOption: keyShowSelinuxHelpTip,
           ));
@@ -869,113 +858,112 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           margin: EdgeInsets.fromLTRB(
               20, marginTop, 20, bind.isIncomingOnly() ? marginTop : 0),
           child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Color.fromARGB(255, 226, 66, 188),
-                    Color.fromARGB(255, 244, 114, 124),
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromARGB(255, 226, 66, 188).withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: Offset(0, 8),
-                  ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(15),
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Color.fromARGB(255, 226, 66, 188),
+                  Color.fromARGB(255, 244, 114, 124),
                 ],
               ),
-              padding: EdgeInsets.all(20),
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: (title.isNotEmpty
-                          ? <Widget>[
-                              Center(
-                                  child: Text(
-                                translate(title),
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18),
-                              ).marginOnly(bottom: 6)),
-                            ]
-                          : <Widget>[]) +
-                      <Widget>[
-                        if (content.isNotEmpty)
-                          Text(
-                            translate(content),
+              boxShadow: [
+                BoxShadow(
+                  color: Color.fromARGB(255, 226, 66, 188).withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: Offset(0, 8),
+                ),
+              ],
+            ),
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (title.isNotEmpty)
+                  Center(
+                    child: Text(
+                      translate(title),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ).marginOnly(bottom: 6),
+                  ),
+                if (content.isNotEmpty)
+                  Text(
+                    translate(content),
+                    style: TextStyle(
+                      height: 1.5,
+                      color: Colors.white,
+                      fontWeight: FontWeight.normal,
+                      fontSize: 14,
+                    ),
+                  ).marginOnly(bottom: 20),
+                if (btnText.isNotEmpty)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 2,
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: onPressed,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                          ),
+                          child: Text(
+                            translate(btnText),
                             style: TextStyle(
-                                height: 1.5,
-                                color: Colors.white,
-                                fontWeight: FontWeight.normal,
-                                fontSize: 14),
-                          ).marginOnly(bottom: 20)
-                      ] +
-                      (btnText.isNotEmpty
-                          ? <Widget>[
-                              Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(25),
-                                        border: Border.all(
-                                          color: Colors.white,
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: ElevatedButton(
-                                        onPressed: onPressed,
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.transparent,
-                                          foregroundColor: Colors.white,
-                                          elevation: 0,
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 30, vertical: 12),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(25),
-                                          ),
-                                        ),
-                                        child: Text(
-                                          translate(btnText),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ])
-                            ]
-                          : <Widget>[]) +
-                      (help != null
-                          ? <Widget>[
-                              Center(
-                                  child: InkWell(
-                                      onTap: () async =>
-                                          await launchUrl(Uri.parse(link!)),
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 8, horizontal: 15),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20),
-                                          color: Colors.white.withOpacity(0.2),
-                                        ),
-                                        child: Text(
-                                          translate(help),
-                                          style: TextStyle(
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              color: Colors.white,
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                      )).marginOnly(top: 10)),
-                            ]
-                          : <Widget>[]))),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                if (help != null)
+                  Center(
+                    child: InkWell(
+                      onTap: () async => await launchUrl(Uri.parse(link!)),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 15),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white.withOpacity(0.2),
+                        ),
+                        child: Text(
+                          translate(help),
+                          style: TextStyle(
+                            decoration: TextDecoration.underline,
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ).marginOnly(top: 10),
+                  ),
+              ],
+            ),
+          ),
+        ),
         if (closeButton != null && closeButton == true)
           Positioned(
             top: 18,
