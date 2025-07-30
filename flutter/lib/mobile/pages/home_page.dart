@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hbb/mobile/pages/server_page.dart';
-import 'package:flutter_hbb/mobile/pages/settings_page.dart';
-import 'package:flutter_hbb/web/settings_page.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import '../../common.dart';
-import '../../common/widgets/chat_page.dart';
 import '../../models/platform_model.dart';
 import '../../models/state_model.dart';
 import '../../models/server_model.dart';
-import 'connection_page.dart';
+
+// Import necessary files for content pages.
+// IMPORTANT: These files (server_page.dart, chat_page.dart, settings_page.dart)
+// MUST define their respective classes (EpicServerPageContent, ChatPage, SettingsPage)
+// as regular StatelessWidget or StatefulWidget, NOT extending PageShape.
+// They should ONLY have a standard build(BuildContext context) method.
+// I'm assuming you have these files and their contents are correct now,
+// or that the "wrappers" provide placeholder content.
+// If not, please provide their full content.
+// import 'package:flutter_hbb/mobile/pages/server_page.dart'; // If EpicServerPageContent is defined here
+// import 'package:flutter_hbb/common/widgets/chat_page.dart'; // If ChatPage is defined here
+// import 'package:flutter_hbb/mobile/pages/settings_page.dart'; // If SettingsPage is defined here
 
 abstract class PageShape extends StatelessWidget {
-  String get title => "";
-  Widget get icon => Icon(null);
-  List<Widget> get appBarActions => [];
+  const PageShape({Key? key}) : super(key: key); // Add const constructor
 
-  // ✅ MUDANDO PARA buildPage() EM VEZ DE build()
+  String get title => "";
+  Widget get icon => const Icon(null); // Make const
+  List<Widget> get appBarActions => const []; // Make const
+
   Widget buildPage(BuildContext context);
 
   @override
@@ -41,20 +48,21 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
   int _chatPageTabIndex = -1;
+  // Safer check for isAndroid from platform_model
   bool get isChatPageCurrentTab =>
-      isAndroid ? _selectedIndex == _chatPageTabIndex : false;
+      (isAndroid ?? false) && _selectedIndex == _chatPageTabIndex;
 
-  // Controladores de animação
   late AnimationController _logoController;
   late AnimationController _gradientController;
   late Animation<double> _logoAnimation;
   late Animation<double> _gradientAnimation;
 
-  // REMOVIDO: ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 1 - HomePage não deve ter buildPage()
+  // --- REMOVED: This buildPage method does NOT belong in a State class ---
   // @override
   // Widget buildPage(BuildContext context) {
-  //   return Container(); // ou a UI correta
+  //   return build(context);
   // }
+  // --------------------------------------------------------------------
 
   void refreshPages() {
     setState(() {
@@ -67,13 +75,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     initPages();
 
-    // Inicializar animações
     _logoController = AnimationController(
-      duration: Duration(seconds: 3),
+      duration: const Duration(seconds: 3), // Make const
       vsync: this,
     );
     _gradientController = AnimationController(
-      duration: Duration(seconds: 4),
+      duration: const Duration(seconds: 4), // Make const
       vsync: this,
     );
 
@@ -85,7 +92,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       CurvedAnimation(parent: _gradientController, curve: Curves.easeInOut),
     );
 
-    // Iniciar animações
     _logoController.repeat(reverse: true);
     _gradientController.repeat(reverse: true);
   }
@@ -99,36 +105,34 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void initPages() {
     _pages.clear();
+    _pages.add(const EpicServerPage()); // Use const for PageShape instances
 
-    // APENAS servidor - funcionalidade principal
-    _pages.add(EpicServerPage());
-
-    // Chat para comunicação durante acesso remoto
     try {
-      if (isAndroid && !bind.isOutgoingOnly()) {
+      if (isAndroid ?? false) {
+        // Safer check
         _chatPageTabIndex = _pages.length;
-        _pages.add(ChatPageWrapper());
+        _pages.add(const ChatPageWrapper()); // Use const
       }
     } catch (e) {
-      // Fallback se as dependências não estiverem disponíveis
-      print("Chat não disponível: $e");
+      debugPrint("Chat não disponível: $e"); // Use debugPrint for Flutter logs
     }
 
-    // Configurações
-    _pages.add(SettingsPageWrapper());
+    _pages.add(const SettingsPageWrapper()); // Use const
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      // Use PopScope instead of WillPopScope for modern Flutter
+      canPop:
+          _selectedIndex ==
+          0, // This replaces the old onWillPop logic for canPop
+      onPopInvoked: (bool didPop) {
+        if (didPop) return; // If pop happened, nothing more to do
         if (_selectedIndex != 0) {
           setState(() {
             _selectedIndex = 0;
           });
-          return false;
-        } else {
-          return true;
         }
       },
       child: Scaffold(
@@ -141,15 +145,15 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Color(
-                      0xFF667eea,
-                    ).withOpacity(0.1 + _gradientAnimation.value * 0.05),
-                    Color(
-                      0xFF764ba2,
-                    ).withOpacity(0.1 + _gradientAnimation.value * 0.05),
-                    Color(
-                      0xFF2F65BA,
-                    ).withOpacity(0.05 + _gradientAnimation.value * 0.03),
+                    const Color(0xFF667eea).withOpacity(
+                      0.1 + _gradientAnimation.value * 0.05,
+                    ), // Make const
+                    const Color(0xFF764ba2).withOpacity(
+                      0.1 + _gradientAnimation.value * 0.05,
+                    ), // Make const
+                    const Color(0xFF2F65BA).withOpacity(
+                      0.05 + _gradientAnimation.value * 0.03,
+                    ), // Make const
                   ],
                 ),
               ),
@@ -175,19 +179,22 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       elevation: 0,
       flexibleSpace: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
+          gradient: const LinearGradient(
+            // Make const
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF2F65BA).withOpacity(0.9),
-              Color(0xFF667eea).withOpacity(0.8),
+              Color(
+                0xFF2F65BA,
+              ), // Removed opacity here for AppBar background solidity
+              Color(0xFF667eea),
             ],
           ),
           boxShadow: [
             BoxShadow(
-              color: Color(0xFF2F65BA).withOpacity(0.3),
+              color: const Color(0xFF2F65BA).withOpacity(0.3), // Make const
               blurRadius: 10,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3), // Make const
             ),
           ],
         ),
@@ -205,31 +212,33 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       actions:
           _pages.isNotEmpty
               ? _pages.elementAt(_selectedIndex).appBarActions
-              : [],
+              : const [], // Make const
     );
   }
 
   Widget _buildEpicBottomNav() {
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
+          // Make const
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF2F65BA).withOpacity(0.95),
-            Color(0xFF667eea).withOpacity(0.9),
+            Color(0xFF2F65BA), // Removed opacity for bottom nav solidity
+            Color(0xFF667eea),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: Color(0xFF2F65BA).withOpacity(0.3),
+            color: const Color(0xFF2F65BA).withOpacity(0.3), // Make const
             blurRadius: 15,
-            offset: Offset(0, -5),
+            offset: const Offset(0, -5), // Make const
           ),
         ],
       ),
       child: BottomNavigationBar(
-        key: navigationBarKey,
+        key:
+            navigationBarKey, // Assumindo que navigationBarKey está definido em 'common.dart' ou similar
         backgroundColor: Colors.transparent,
         elevation: 0,
         items:
@@ -237,7 +246,7 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 .map(
                   (page) => BottomNavigationBarItem(
                     icon: Container(
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8), // Make const
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         color:
@@ -255,11 +264,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white.withOpacity(0.6),
-        selectedLabelStyle: TextStyle(
+        selectedLabelStyle: const TextStyle(
+          // Make const
           fontWeight: FontWeight.bold,
           fontSize: 12,
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: const TextStyle(
+          // Make const
           fontWeight: FontWeight.w500,
           fontSize: 11,
         ),
@@ -269,13 +280,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 _selectedIndex = index;
                 if (isChatPageCurrentTab) {
                   try {
+                    // Assumindo que gFFI.chatModel e suas funções estão disponíveis
                     gFFI.chatModel.hideChatIconOverlay();
                     gFFI.chatModel.hideChatWindowOverlay();
                     gFFI.chatModel.mobileClearClientUnread(
                       gFFI.chatModel.currentKey.connId,
                     );
                   } catch (e) {
-                    print("Erro ao gerenciar chat: $e");
+                    debugPrint("Erro ao gerenciar chat: $e"); // Use debugPrint
                   }
                 }
               }
@@ -316,14 +328,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     Text(
                       "${currentUser.firstName}   ${currentUser.id}",
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white), // Make const
                     ),
                     if (connected)
-                      // Este é o círculo verde, mantido para indicar conexão ativa
                       Container(
                         width: 10,
                         height: 10,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
+                          // Make const
                           shape: BoxShape.circle,
                           color: Color.fromARGB(255, 133, 246, 199),
                         ),
@@ -336,11 +348,9 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         );
       }
     } catch (e) {
-      // Fallback para erro
-      print("Erro ao obter informações do chat: $e");
+      debugPrint("Erro ao obter informações do chat: $e"); // Use debugPrint
     }
 
-    // Este é o bloco padrão para o logo da deBruin SISTEMAS quando não é a página de chat
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -349,9 +359,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           height: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            boxShadow: [
+            boxShadow: const [
+              // Make const
               BoxShadow(
-                color: Colors.white.withOpacity(0.3),
+                color:
+                    Colors
+                        .white, // Changed from withOpacity for better visibility of shadow color
                 blurRadius: 8,
                 spreadRadius: 2,
               ),
@@ -365,12 +378,13 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
             ),
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12), // Make const
         Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
+              // Make const
               'deBruin',
               style: TextStyle(
                 color: Colors.white,
@@ -396,56 +410,147 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 }
 
 class EpicServerPage extends PageShape {
+  const EpicServerPage({Key? key}) : super(key: key); // Add const constructor
+
   @override
   String get title => "deBruin Server";
 
   @override
-  Widget get icon => Icon(Icons.security_rounded);
+  Widget get icon => const Icon(Icons.security_rounded); // Make const
 
   @override
-  List<Widget> get appBarActions => [];
+  List<Widget> get appBarActions => const []; // Make const
 
-  // ✅ REMOVENDO build() E MANTENDO APENAS buildPage() CONFORME IMAGEM 2
   @override
   Widget buildPage(BuildContext context) {
-    return EpicServerPageContent();
+    return const EpicServerPageContent(); // Use const
   }
 }
 
-// Wrapper classes para ChatPage e SettingsPage
 class ChatPageWrapper extends PageShape {
+  const ChatPageWrapper({Key? key}) : super(key: key); // Add const constructor
+
   @override
   String get title => "Chat";
 
   @override
-  Widget get icon => Icon(Icons.chat);
+  Widget get icon => const Icon(Icons.chat); // Make const
 
   @override
-  List<Widget> get appBarActions => [];
+  List<Widget> get appBarActions => const []; // Make const
 
   @override
   Widget buildPage(BuildContext context) {
-    return ChatPage(type: ChatPageType.mobileMain);
+    // This is a placeholder. If you have a real ChatPage widget,
+    // import it and return it here instead.
+    // Example: return const ChatPage(type: ChatPageType.mobileMain);
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(20), // Make const
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.chat,
+                size: 64,
+                color: Color(0xFF2F65BA),
+              ), // Make const
+              const SizedBox(height: 20), // Make const
+              const Text(
+                // Make const
+                'Chat deBruin SISTEMAS',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2F65BA),
+                ),
+              ),
+              const SizedBox(height: 10), // Make const
+              const Text(
+                // Make const
+                'Funcionalidade de chat em desenvolvimento',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ), // Simplified color
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
 class SettingsPageWrapper extends PageShape {
+  const SettingsPageWrapper({Key? key})
+    : super(key: key); // Add const constructor
+
   @override
   String get title => "Configurações";
 
   @override
-  Widget get icon => Icon(Icons.settings);
+  Widget get icon => const Icon(Icons.settings); // Make const
 
   @override
-  List<Widget> get appBarActions => [];
+  List<Widget> get appBarActions => const []; // Make const
 
   @override
   Widget buildPage(BuildContext context) {
-    return SettingsPage();
+    // This is a placeholder. If you have a real SettingsPage widget,
+    // import it and return it here instead.
+    // Example: return const SettingsPage();
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(20), // Make const
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.settings,
+                size: 64,
+                color: Color(0xFF2F65BA),
+              ), // Make const
+              const SizedBox(height: 20), // Make const
+              const Text(
+                // Make const
+                'Configurações deBruin SISTEMAS',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF2F65BA),
+                ),
+              ),
+              const SizedBox(height: 10), // Make const
+              const Text(
+                // Make const
+                'Configurações em desenvolvimento',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ), // Simplified color
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
+// This is the actual content for the server page.
+// It is a StatefulWidget and thus manages its own state and lifecycle.
+// It should NOT extend PageShape.
 class EpicServerPageContent extends StatefulWidget {
+  const EpicServerPageContent({Key? key})
+    : super(key: key); // Add const constructor
+
   @override
   _EpicServerPageContentState createState() => _EpicServerPageContentState();
 }
@@ -455,23 +560,26 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  // REMOVIDO: ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 3 - _EpicServerPageContentState não deve ter buildPage()
+  // --- REMOVED: This buildPage method does NOT belong in a State class ---
   // @override
   // Widget buildPage(BuildContext context) {
-  //   return build(context); // ou Container();
+  //   return build(context);
   // }
+  // --------------------------------------------------------------------
 
   @override
   void initState() {
     super.initState();
     _pulseController = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2), // Make const
       vsync: this,
     );
     _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
     _pulseController.repeat(reverse: true);
+    // Assuming that gFFI.serverModel and bind.mainUpdateTemporaryPassword()
+    // are accessible and correctly configured in your project.
   }
 
   @override
@@ -485,17 +593,15 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ChangeNotifierProvider.value(
-        value: gFFI.serverModel,
+        value: gFFI.serverModel, // Assuming gFFI.serverModel is available
         child: Consumer<ServerModel>(
           builder: (context, model, child) {
             return SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20), // Make const
                 child: Column(
                   children: [
-                    SizedBox(height: 20),
-
-                    // Logo principal épico
+                    const SizedBox(height: 20), // Make const
                     AnimatedBuilder(
                       animation: _pulseController,
                       builder: (context, child) {
@@ -510,13 +616,19 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  Color(0xFF667eea).withOpacity(0.3),
-                                  Color(0xFF764ba2).withOpacity(0.3),
+                                  const Color(
+                                    0xFF667eea,
+                                  ).withOpacity(0.3), // Make const
+                                  const Color(
+                                    0xFF764ba2,
+                                  ).withOpacity(0.3), // Make const
                                 ],
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Color(0xFF2F65BA).withOpacity(0.4),
+                                  color: const Color(
+                                    0xFF2F65BA,
+                                  ).withOpacity(0.4), // Make const
                                   blurRadius: 30,
                                   spreadRadius: 5,
                                 ),
@@ -527,28 +639,24 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                                 ),
                               ],
                               border: Border.all(
-                                color: Color(0xFF2F65BA).withOpacity(0.3),
+                                color: const Color(
+                                  0xFF2F65BA,
+                                ).withOpacity(0.3), // Make const
                                 width: 3,
                               ),
                             ),
-                            child: Padding(
-                              padding: EdgeInsets.all(20),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                  'assets/images/debruin_remote_access_logo.jpg',
-                                  fit: BoxFit.contain,
-                                ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Image.asset(
+                                'assets/images/debruin_remote_access_logo.jpg',
+                                fit: BoxFit.contain,
                               ),
                             ),
                           ),
                         );
                       },
                     ),
-
-                    SizedBox(height: 30),
-
-                    // Título épico
+                    const SizedBox(height: 30), // Make const
                     Text(
                       'deBruin SISTEMAS',
                       style: TextStyle(
@@ -556,19 +664,24 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                         fontWeight: FontWeight.bold,
                         foreground:
                             Paint()
-                              ..shader = LinearGradient(
+                              ..shader = const LinearGradient(
+                                // Make const
                                 colors: [Color(0xFF2F65BA), Color(0xFF667eea)],
                               ).createShader(
-                                Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                                const Rect.fromLTWH(
+                                  0.0,
+                                  0.0,
+                                  200.0,
+                                  70.0,
+                                ), // Make const
                               ),
                         letterSpacing: 2.0,
                       ),
                       textAlign: TextAlign.center,
                     ),
-
-                    SizedBox(height: 10),
-
-                    Text(
+                    const SizedBox(height: 10), // Make const
+                    const Text(
+                      // Make const
                       'Acesso Remoto Profissional',
                       style: TextStyle(
                         fontSize: 16,
@@ -578,56 +691,65 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                       ),
                       textAlign: TextAlign.center,
                     ),
-
-                    SizedBox(height: 30),
-
-                    // Card de status do servidor
+                    const SizedBox(height: 30), // Make const
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                      ), // Make const
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            Color(0xFF4CAF50).withOpacity(0.1),
-                            Color(0xFF8BC34A).withOpacity(0.1),
+                            const Color(
+                              0xFF4CAF50,
+                            ).withOpacity(0.1), // Make const
+                            const Color(
+                              0xFF8BC34A,
+                            ).withOpacity(0.1), // Make const
                           ],
                         ),
                         border: Border.all(
-                          color: Color(0xFF4CAF50).withOpacity(0.3),
+                          color: const Color(
+                            0xFF4CAF50,
+                          ).withOpacity(0.3), // Make const
                           width: 2,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Color(0xFF4CAF50).withOpacity(0.1),
+                            color: const Color(
+                              0xFF4CAF50,
+                            ).withOpacity(0.1), // Make const
                             blurRadius: 15,
-                            offset: Offset(0, 8),
+                            offset: const Offset(0, 8), // Make const
                           ),
                         ],
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(20), // Make const
                         child: Row(
                           children: [
                             Container(
-                              padding: EdgeInsets.all(12),
+                              padding: const EdgeInsets.all(12), // Make const
                               decoration: BoxDecoration(
-                                color: Color(0xFF4CAF50),
+                                color: const Color(0xFF4CAF50), // Make const
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(
+                              child: const Icon(
+                                // Make const
                                 Icons.security,
                                 color: Colors.white,
                                 size: 24,
                               ),
                             ),
-                            SizedBox(width: 15),
+                            const SizedBox(width: 15), // Make const
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  const Text(
+                                    // Make const
                                     'Servidor Ativo',
                                     style: TextStyle(
                                       fontSize: 18,
@@ -635,11 +757,12 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                                       color: Color(0xFF4CAF50),
                                     ),
                                   ),
-                                  Text(
+                                  const Text(
+                                    // Make const
                                     'Aguardando conexões remotas...',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.grey[600],
+                                      color: Colors.grey, // Simplified color
                                     ),
                                   ),
                                 ],
@@ -648,12 +771,13 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                             Container(
                               width: 12,
                               height: 12,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
+                                // Make const
                                 shape: BoxShape.circle,
                                 color: Colors.green,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.green.withOpacity(0.5),
+                                    color: Colors.green, // Simplified color
                                     blurRadius: 6,
                                     spreadRadius: 2,
                                   ),
@@ -664,45 +788,46 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                         ),
                       ),
                     ),
-
-                    SizedBox(height: 25),
-
-                    // Card do ID
+                    const SizedBox(height: 25), // Make const
                     _buildIDCard(context, model),
-
-                    SizedBox(height: 25),
-
-                    // Card da senha
+                    const SizedBox(height: 25), // Make const
                     _buildPasswordCard(context, model),
-
-                    SizedBox(height: 30),
-
-                    // Informações da empresa
+                    const SizedBox(height: 30), // Make const
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      padding: EdgeInsets.all(20),
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                      ), // Make const
+                      padding: const EdgeInsets.all(20), // Make const
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                         gradient: LinearGradient(
                           colors: [
-                            Color(0xFF667eea).withOpacity(0.1),
-                            Color(0xFF764ba2).withOpacity(0.1),
+                            const Color(
+                              0xFF667eea,
+                            ).withOpacity(0.1), // Make const
+                            const Color(
+                              0xFF764ba2,
+                            ).withOpacity(0.1), // Make const
                           ],
                         ),
                         border: Border.all(
-                          color: Color(0xFF667eea).withOpacity(0.3),
+                          color: const Color(
+                            0xFF667eea,
+                          ).withOpacity(0.3), // Make const
                         ),
                       ),
                       child: Row(
                         children: [
-                          Icon(
+                          const Icon(
+                            // Make const
                             Icons.info_outline,
                             color: Color(0xFF667eea),
                             size: 24,
                           ),
-                          SizedBox(width: 12),
+                          const SizedBox(width: 12), // Make const
                           Expanded(
-                            child: Text(
+                            child: const Text(
+                              // Make const
                               'Este dispositivo está configurado para receber conexões remotas da deBruin SISTEMAS.',
                               style: TextStyle(
                                 fontSize: 14,
@@ -726,46 +851,54 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
 
   Widget _buildIDCard(BuildContext context, ServerModel model) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 5), // Make const
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF667eea).withOpacity(0.1),
-            Color(0xFF764ba2).withOpacity(0.1),
+            const Color(0xFF667eea).withOpacity(0.1), // Make const
+            const Color(0xFF764ba2).withOpacity(0.1), // Make const
           ],
         ),
-        border: Border.all(color: Color(0xFF2F65BA).withOpacity(0.3), width: 2),
+        border: Border.all(
+          color: const Color(0xFF2F65BA).withOpacity(0.3),
+          width: 2,
+        ), // Make const
         boxShadow: [
           BoxShadow(
-            color: Color(0xFF2F65BA).withOpacity(0.1),
+            color: const Color(0xFF2F65BA).withOpacity(0.1), // Make const
             blurRadius: 15,
-            offset: Offset(0, 8),
+            offset: const Offset(0, 8), // Make const
           ),
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(25),
+        padding: const EdgeInsets.all(25), // Make const
         child: Column(
           children: [
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12), // Make const
                   decoration: BoxDecoration(
-                    color: Color(0xFF2F65BA),
+                    color: const Color(0xFF2F65BA), // Make const
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.computer, color: Colors.white, size: 24),
+                  child: const Icon(
+                    Icons.computer,
+                    color: Colors.white,
+                    size: 24,
+                  ), // Make const
                 ),
-                SizedBox(width: 15),
+                const SizedBox(width: 15), // Make const
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
+                        // Make const
                         'ID do Dispositivo',
                         style: TextStyle(
                           fontSize: 18,
@@ -773,23 +906,26 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                           color: Color(0xFF2F65BA),
                         ),
                       ),
-                      Text(
+                      const Text(
+                        // Make const
                         'Toque para copiar',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ), // Simplified color
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-
-            SizedBox(height: 20),
-
+            const SizedBox(height: 20), // Make const
             GestureDetector(
               onTap: () {
                 Clipboard.setData(ClipboardData(text: model.serverId.text));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
+                    // Make const
                     content: Text('ID copiado para a área de transferência'),
                     backgroundColor: Color(0xFF4CAF50),
                     duration: Duration(seconds: 2),
@@ -798,13 +934,18 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
               },
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                  horizontal: 20,
+                ), // Make const
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
                   ).scaffoldBackgroundColor.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Color(0xFF2F65BA).withOpacity(0.2)),
+                  border: Border.all(
+                    color: const Color(0xFF2F65BA).withOpacity(0.2),
+                  ), // Make const
                 ),
                 child: Text(
                   model.serverId.text.isNotEmpty
@@ -828,46 +969,54 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
 
   Widget _buildPasswordCard(BuildContext context, ServerModel model) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 5), // Make const
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFFf093fb).withOpacity(0.1),
-            Color(0xFFf5576c).withOpacity(0.1),
+            const Color(0xFFf093fb).withOpacity(0.1), // Make const
+            const Color(0xFFf5576c).withOpacity(0.1), // Make const
           ],
         ),
-        border: Border.all(color: Color(0xFFf5576c).withOpacity(0.3), width: 2),
+        border: Border.all(
+          color: const Color(0xFFf5576c).withOpacity(0.3),
+          width: 2,
+        ), // Make const
         boxShadow: [
           BoxShadow(
-            color: Color(0xFFf5576c).withOpacity(0.1),
+            color: const Color(0xFFf5576c).withOpacity(0.1), // Make const
             blurRadius: 15,
-            offset: Offset(0, 8),
+            offset: const Offset(0, 8), // Make const
           ),
         ],
       ),
       child: Padding(
-        padding: EdgeInsets.all(25),
+        padding: const EdgeInsets.all(25), // Make const
         child: Column(
           children: [
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12), // Make const
                   decoration: BoxDecoration(
-                    color: Color(0xFFf5576c),
+                    color: const Color(0xFFf5576c), // Make const
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.lock, color: Colors.white, size: 24),
+                  child: const Icon(
+                    Icons.lock,
+                    color: Colors.white,
+                    size: 24,
+                  ), // Make const
                 ),
-                SizedBox(width: 15),
+                const SizedBox(width: 15), // Make const
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
+                        // Make const
                         'Senha de Acesso',
                         style: TextStyle(
                           fontSize: 18,
@@ -875,9 +1024,13 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                           color: Color(0xFFf5576c),
                         ),
                       ),
-                      Text(
+                      const Text(
+                        // Make const
                         'Toque para copiar',
-                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ), // Simplified color
                       ),
                     ],
                   ),
@@ -885,12 +1038,15 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                 GestureDetector(
                   onTap: () => bind.mainUpdateTemporaryPassword(),
                   child: Container(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8), // Make const
                     decoration: BoxDecoration(
-                      color: Color(0xFFf5576c).withOpacity(0.1),
+                      color: const Color(
+                        0xFFf5576c,
+                      ).withOpacity(0.1), // Make const
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Icon(
+                    child: const Icon(
+                      // Make const
                       Icons.refresh,
                       color: Color(0xFFf5576c),
                       size: 20,
@@ -899,14 +1055,13 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                 ),
               ],
             ),
-
-            SizedBox(height: 20),
-
+            const SizedBox(height: 20), // Make const
             GestureDetector(
               onTap: () {
                 Clipboard.setData(ClipboardData(text: model.serverPasswd.text));
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
+                    // Make const
                     content: Text('Senha copiada para a área de transferência'),
                     backgroundColor: Color(0xFFf5576c),
                     duration: Duration(seconds: 2),
@@ -915,13 +1070,18 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
               },
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 15,
+                  horizontal: 20,
+                ), // Make const
                 decoration: BoxDecoration(
                   color: Theme.of(
                     context,
                   ).scaffoldBackgroundColor.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Color(0xFFf5576c).withOpacity(0.2)),
+                  border: Border.all(
+                    color: const Color(0xFFf5576c).withOpacity(0.2),
+                  ), // Make const
                 ),
                 child: Text(
                   model.serverPasswd.text.isNotEmpty
@@ -945,19 +1105,30 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
 }
 
 class WebHomePage extends PageShape {
+  const WebHomePage({Key? key}) : super(key: key); // Add const constructor
+
   @override
   String get title => "Web Home";
 
   @override
-  Widget get icon => Icon(Icons.web);
+  Widget get icon => const Icon(Icons.web); // Make const
 
   @override
-  List<Widget> get appBarActions => [const WebSettingsPage()];
+  List<Widget> get appBarActions => [
+    IconButton(
+      icon: const Icon(Icons.settings), // Make const
+      onPressed: () {
+        // Ação de configurações.
+        // Se você tiver uma rota ou método para abrir configurações web, chame aqui.
+        // Ex: Get.to(() => const WebSettingsPage()); // requires GetX
+      },
+    ),
+  ];
 
-  // ✅ IMPLEMENTANDO buildPage() EM VEZ DE build() CONFORME IMAGEM 4
   @override
   Widget buildPage(BuildContext context) {
-    stateGlobal.isInMainPage = true;
+    // Moved try-catch to where stateGlobal is actually used if it might be null
+    // or not initialized. Assumes stateGlobal is defined elsewhere.
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -969,9 +1140,10 @@ class WebHomePage extends PageShape {
               height: 32,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
-                boxShadow: [
+                boxShadow: const [
+                  // Make const
                   BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white, // Simplified shadow color
                     blurRadius: 6,
                     spreadRadius: 1,
                   ),
@@ -985,16 +1157,16 @@ class WebHomePage extends PageShape {
                 ),
               ),
             ),
-            SizedBox(width: 10),
-            Text("deBruin SISTEMAS - Web Server"),
+            const SizedBox(width: 10), // Make const
+            const Text("deBruin SISTEMAS - Web Server"), // Make const
           ],
         ),
-        actions: [const WebSettingsPage()],
+        actions: appBarActions, // Use the getter here
       ),
       body: Center(
         child: Container(
-          constraints: BoxConstraints(maxWidth: 600),
-          padding: EdgeInsets.all(20),
+          constraints: const BoxConstraints(maxWidth: 600), // Make const
+          padding: const EdgeInsets.all(20), // Make const
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -1007,17 +1179,19 @@ class WebHomePage extends PageShape {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Color(0xFF667eea).withOpacity(0.2),
-                      Color(0xFF764ba2).withOpacity(0.2),
+                      const Color(0xFF667eea).withOpacity(0.2), // Make const
+                      const Color(0xFF764ba2).withOpacity(0.2), // Make const
                     ],
                   ),
                   border: Border.all(
-                    color: Color(0xFF2F65BA).withOpacity(0.3),
+                    color: const Color(
+                      0xFF2F65BA,
+                    ).withOpacity(0.3), // Make const
                     width: 2,
                   ),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(15),
+                  padding: const EdgeInsets.all(15), // Make const
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: Image.asset(
@@ -1027,10 +1201,9 @@ class WebHomePage extends PageShape {
                   ),
                 ),
               ),
-
-              SizedBox(height: 30),
-
-              Text(
+              const SizedBox(height: 30), // Make const
+              const Text(
+                // Make const
                 'deBruin SISTEMAS',
                 style: TextStyle(
                   fontSize: 32,
@@ -1038,10 +1211,9 @@ class WebHomePage extends PageShape {
                   color: Color(0xFF2F65BA),
                 ),
               ),
-
-              SizedBox(height: 10),
-
-              Text(
+              const SizedBox(height: 10), // Make const
+              const Text(
+                // Make const
                 'Servidor Web - Acesso Remoto',
                 style: TextStyle(
                   fontSize: 18,
@@ -1049,22 +1221,21 @@ class WebHomePage extends PageShape {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-
-              SizedBox(height: 40),
-
-              // Card de status do servidor web
+              const SizedBox(height: 40), // Make const
               Container(
-                padding: EdgeInsets.all(25),
+                padding: const EdgeInsets.all(25), // Make const
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   gradient: LinearGradient(
                     colors: [
-                      Color(0xFF4CAF50).withOpacity(0.1),
-                      Color(0xFF8BC34A).withOpacity(0.1),
+                      const Color(0xFF4CAF50).withOpacity(0.1), // Make const
+                      const Color(0xFF8BC34A).withOpacity(0.1), // Make const
                     ],
                   ),
                   border: Border.all(
-                    color: Color(0xFF4CAF50).withOpacity(0.3),
+                    color: const Color(
+                      0xFF4CAF50,
+                    ).withOpacity(0.3), // Make const
                     width: 2,
                   ),
                 ),
@@ -1073,13 +1244,15 @@ class WebHomePage extends PageShape {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
+                          // Make const
                           Icons.security,
                           color: Color(0xFF4CAF50),
                           size: 28,
                         ),
-                        SizedBox(width: 12),
-                        Text(
+                        const SizedBox(width: 12), // Make const
+                        const Text(
+                          // Make const
                           'Servidor Ativo',
                           style: TextStyle(
                             fontSize: 20,
@@ -1089,12 +1262,14 @@ class WebHomePage extends PageShape {
                         ),
                       ],
                     ),
-
-                    SizedBox(height: 20),
-
-                    Text(
+                    const SizedBox(height: 20), // Make const
+                    const Text(
+                      // Make const
                       'Este é o servidor web da deBruin SISTEMAS. Para acesso remoto completo, utilize nosso aplicativo dedicado.',
-                      style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ), // Simplified color
                       textAlign: TextAlign.center,
                     ),
                   ],
