@@ -9,7 +9,7 @@ import 'package:flutter_hbb/common.dart';
 import 'package:flutter_hbb/common/widgets/animated_rotation_widget.dart';
 import 'package:flutter_hbb/common/widgets/custom_password.dart';
 import 'package:flutter_hbb/consts.dart';
-import 'package:flutter_hbb/desktop/pages/connection_page.dart';
+import 'package:flutter_hbb/desktop/pages/connection_page.dart'; // Mantido para caso haja uso indireto, mas a ConnectionPage em si não é mais o painel direito
 import 'package:flutter_hbb/desktop/pages/desktop_setting_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_tab_page.dart';
 import 'package:flutter_hbb/desktop/widgets/update_progress.dart';
@@ -35,9 +35,12 @@ class DesktopHomePage extends StatefulWidget {
 const borderColor = Color(0xFF2F65BA);
 
 class _DesktopHomePageState extends State<DesktopHomePage>
-    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver, TickerProviderStateMixin {
+    with
+        AutomaticKeepAliveClientMixin,
+        WidgetsBindingObserver,
+        TickerProviderStateMixin {
   final _leftPaneScrollController = ScrollController();
-  
+
   // Controladores de animação para efeitos épicos
   late AnimationController _pulseController;
   late AnimationController _glowController;
@@ -73,7 +76,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Color(0xFF2F65BA).withOpacity(_glowAnimation.value * 0.5),
+                color: const Color(
+                  0xFF2F65BA,
+                ).withOpacity(_glowAnimation.value * 0.5),
                 blurRadius: 30 * _glowAnimation.value,
                 spreadRadius: 5 * _glowAnimation.value,
               ),
@@ -90,19 +95,19 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               return Transform.translate(
                 offset: _slideAnimation.value,
                 child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFF667eea).withOpacity(0.1),
-                        Color(0xFF764ba2).withOpacity(0.1),
+                        Color(0xFF667eea), // Removido opacity para const
+                        Color(0xFF764ba2), // Removido opacity para const
                       ],
                     ),
                     border: Border.all(
-                      color: Color(0xFF2F65BA).withOpacity(0.3),
+                      color: const Color(0xFF2F65BA).withOpacity(0.3),
                       width: 2,
                     ),
                   ),
@@ -127,7 +132,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final isIncomingOnly = bind.isIncomingOnly();
+    // Apenas o painel esquerdo deve ser visível para este caso de uso (somente incoming)
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -140,22 +145,28 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         ),
       ),
       child: _buildBlock(
-        child: buildLeftPane(context), // APENAS o painel esquerdo (servidor)
+        // Removido o Row principal, pois agora só há um painel
+        child: buildLeftPane(context),
       ),
     );
   }
 
   Widget _buildBlock({required Widget child}) {
     return buildRemoteBlock(
-        block: _block, mask: true, use: canBeBlocked, child: child);
+      block: _block,
+      mask: true,
+      use: canBeBlocked,
+      child: child,
+    );
   }
 
   Widget buildLeftPane(BuildContext context) {
     final isIncomingOnly = bind.isIncomingOnly();
-    final isOutgoingOnly = bind.isOutgoingOnly();
+    final isOutgoingOnly =
+        bind.isOutgoingOnly(); // isOutgoingOnly será sempre false neste contexto
     final children = <Widget>[
-      SizedBox(height: 20),
-      
+      const SizedBox(height: 20),
+
       // Título da empresa
       Align(
         alignment: Alignment.center,
@@ -166,15 +177,20 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                foreground: Paint()
-                  ..shader = LinearGradient(
-                    colors: [Color(0xFF2F65BA), Color(0xFF667eea)],
-                  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                foreground:
+                    Paint()
+                      ..shader = const LinearGradient(
+                        // Adicionado const
+                        colors: [Color(0xFF2F65BA), Color(0xFF667eea)],
+                      ).createShader(
+                        const Rect.fromLTWH(0.0, 0.0, 200.0, 70.0),
+                      ), // Adicionado const
                 letterSpacing: 2.0,
               ),
             ),
-            SizedBox(height: 8),
-            Text(
+            const SizedBox(height: 8),
+            const Text(
+              // Adicionado const
               'Acesso Remoto Profissional',
               style: TextStyle(
                 fontSize: 14,
@@ -186,25 +202,22 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           ],
         ),
       ),
-      
-      SizedBox(height: 20),
-      
+
+      const SizedBox(height: 20),
+
       // Logo centralizado com efeitos épicos
       AnimatedBuilder(
         animation: _pulseController,
         builder: (context, child) {
           return Transform.scale(
             scale: 1.0 + (_pulseAnimation.value * 0.05),
-            child: Align(
-              alignment: Alignment.center,
-              child: _buildEpicLogo(),
-            ),
+            child: Align(alignment: Alignment.center, child: _buildEpicLogo()),
           );
         },
       ),
-      
-      SizedBox(height: 20),
-      
+
+      const SizedBox(height: 20),
+
       // Card de status do servidor
       Container(
         margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -214,19 +227,19 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF4CAF50).withOpacity(0.1),
-              Color(0xFF8BC34A).withOpacity(0.1),
+              const Color(0xFF4CAF50).withOpacity(0.1),
+              const Color(0xFF8BC34A).withOpacity(0.1),
             ],
           ),
           border: Border.all(
-            color: Color(0xFF4CAF50).withOpacity(0.3),
+            color: const Color(0xFF4CAF50).withOpacity(0.3),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Color(0xFF4CAF50).withOpacity(0.1),
+              color: const Color(0xFF4CAF50).withOpacity(0.1),
               blurRadius: 10,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -235,23 +248,23 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Color(0xFF4CAF50),
+                  color: const Color(0xFF4CAF50),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.security,
                   color: Colors.white,
                   size: 24,
                 ),
               ),
-              SizedBox(width: 15),
+              const SizedBox(width: 15),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Servidor Ativo',
                       style: TextStyle(
                         fontSize: 18,
@@ -261,10 +274,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                     ),
                     Text(
                       'Aguardando conexões remotas...',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
@@ -288,21 +298,22 @@ class _DesktopHomePageState extends State<DesktopHomePage>
           ),
         ),
       ),
-      
-      SizedBox(height: 20),
-      
+
+      const SizedBox(height: 20),
+
       // Informações do servidor - sempre visível
       buildIDBoard(context),
       buildPasswordBoard(context),
-      
+
       FutureBuilder<Widget>(
         future: Future.value(
-            Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
+          Obx(() => buildHelpCards(stateGlobal.updateUrl.value)),
+        ),
         builder: (_, data) {
           if (data.hasData) {
             if (isIncomingOnly) {
               if (isInHomePage()) {
-                Future.delayed(Duration(milliseconds: 300), () {
+                Future.delayed(const Duration(milliseconds: 300), () {
                   _updateWindowSize();
                 });
               }
@@ -315,25 +326,33 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       ),
       buildPluginEntry(),
     ];
-    
+
+    // As condições para `isIncomingOnly` e `isOutgoingOnly`
+    // já estão incorporadas na lógica de children.
+    // O painel direito (ConnectionPage) foi removido na lógica anterior.
+
     if (isIncomingOnly) {
       children.addAll([
-        Divider(
-          color: Color(0xFF2F65BA).withOpacity(0.3),
+        const Divider(
+          color: Color(0xFF2F65BA), // Removido opacity para const
           thickness: 2,
         ),
-        OnlineStatusWidget(
-          onSvcStatusChanged: () {
-            if (isInHomePage()) {
-              Future.delayed(Duration(milliseconds: 300), () {
-                _updateWindowSize();
-              });
-            }
-          },
-        ).marginOnly(bottom: 6, right: 6)
+        // Adicionando Padding explícito no lugar de marginOnly
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6, right: 6),
+          child: OnlineStatusWidget(
+            onSvcStatusChanged: () {
+              if (isInHomePage()) {
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  _updateWindowSize();
+                });
+              }
+            },
+          ),
+        ),
       ]);
     }
-    
+
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
     return ChangeNotifierProvider.value(
       value: gFFI.serverModel,
@@ -343,7 +362,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             center: Alignment.topCenter,
             radius: 2.0,
             colors: [
-              Color(0xFF2F65BA).withOpacity(0.05),
+              const Color(0xFF2F65BA).withOpacity(0.05),
               Theme.of(context).colorScheme.background,
             ],
           ),
@@ -354,12 +373,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               children: [
                 SingleChildScrollView(
                   controller: _leftPaneScrollController,
-                  child: Column(
-                    key: _childKey,
-                    children: children,
-                  ),
+                  child: Column(key: _childKey, children: children),
                 ),
-                Expanded(child: Container())
+                Expanded(child: Container()),
               ],
             ),
             if (isOutgoingOnly)
@@ -370,37 +386,40 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     child: Container(
-                      padding: EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(25),
                         gradient: LinearGradient(
                           colors: [
-                            Color(0xFF2F65BA).withOpacity(0.1),
-                            Color(0xFF2F65BA).withOpacity(0.2),
+                            const Color(0xFF2F65BA).withOpacity(0.1),
+                            const Color(0xFF2F65BA).withOpacity(0.2),
                           ],
                         ),
                       ),
                       child: Obx(
                         () => Icon(
                           Icons.settings,
-                          color: _editHover.value
-                              ? textColor
-                              : Colors.grey.withOpacity(0.5),
+                          color:
+                              _editHover.value
+                                  ? textColor
+                                  : Colors.grey.withOpacity(0.5),
                           size: 22,
                         ),
                       ),
                     ),
-                    onTap: () => {
-                      if (DesktopSettingPage.tabKeys.isNotEmpty)
-                        {
-                          DesktopSettingPage.switch2page(
-                              DesktopSettingPage.tabKeys[0])
-                        }
-                    },
+                    onTap:
+                        () => {
+                          if (DesktopSettingPage.tabKeys.isNotEmpty)
+                            {
+                              DesktopSettingPage.switch2page(
+                                DesktopSettingPage.tabKeys[0],
+                              ),
+                            },
+                        },
                     onHover: (value) => _editHover.value = value,
                   ),
                 ),
-              )
+              ),
           ],
         ),
       ),
@@ -420,19 +439,19 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFF667eea).withOpacity(0.1),
-              Color(0xFF764ba2).withOpacity(0.1),
+              const Color(0xFF667eea).withOpacity(0.1),
+              const Color(0xFF764ba2).withOpacity(0.1),
             ],
           ),
           border: Border.all(
-            color: Color(0xFF2F65BA).withOpacity(0.3),
+            color: const Color(0xFF2F65BA).withOpacity(0.3),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Color(0xFF2F65BA).withOpacity(0.1),
+              color: const Color(0xFF2F65BA).withOpacity(0.1),
               blurRadius: 10,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -447,20 +466,21 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                   Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Color(0xFF2F65BA),
+                          color: const Color(0xFF2F65BA),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.computer,
                           color: Colors.white,
                           size: 16,
                         ),
                       ),
-                      SizedBox(width: 10),
-                      Text(
-                        translate("ID"),
+                      const SizedBox(width: 10),
+                      const Text(
+                        // Adicionado const
+                        "ID",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -472,7 +492,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                   buildPopupMenu(context),
                 ],
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               GestureDetector(
                 onDoubleTap: () {
                   Clipboard.setData(ClipboardData(text: model.serverId.text));
@@ -480,12 +500,17 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                 },
                 child: Container(
                   width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 15,
+                  ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                    color: Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: Color(0xFF2F65BA).withOpacity(0.2),
+                      color: const Color(0xFF2F65BA).withOpacity(0.2),
                     ),
                   ),
                   child: Text(
@@ -516,17 +541,21 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         message: translate('Settings'),
         child: Obx(
           () => Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: hover.value
-                  ? Color(0xFF2F65BA).withOpacity(0.1)
-                  : Colors.transparent,
+              color:
+                  hover.value
+                      ? const Color(0xFF2F65BA).withOpacity(0.1)
+                      : Colors.transparent,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(
               Icons.more_vert_outlined,
               size: 20,
-              color: hover.value ? Color(0xFF2F65BA) : textColor?.withOpacity(0.5),
+              color:
+                  hover.value
+                      ? const Color(0xFF2F65BA)
+                      : textColor?.withOpacity(0.5),
             ),
           ),
         ),
@@ -537,21 +566,23 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   buildPasswordBoard(BuildContext context) {
     return ChangeNotifierProvider.value(
-        value: gFFI.serverModel,
-        child: Consumer<ServerModel>(
-          builder: (context, model, child) {
-            return buildPasswordBoard2(context, model);
-          },
-        ));
+      value: gFFI.serverModel,
+      child: Consumer<ServerModel>(
+        builder: (context, model, child) {
+          return buildPasswordBoard2(context, model);
+        },
+      ),
+    );
   }
 
   buildPasswordBoard2(BuildContext context, ServerModel model) {
     RxBool refreshHover = false.obs;
     RxBool editHover = false.obs;
     final textColor = Theme.of(context).textTheme.titleLarge?.color;
-    final showOneTime = model.approveMode != 'click' &&
+    final showOneTime =
+        model.approveMode != 'click' &&
         model.verificationMethod != kUsePermanentPassword;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Container(
@@ -561,19 +592,19 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Color(0xFFf093fb).withOpacity(0.1),
-              Color(0xFFf5576c).withOpacity(0.1),
+              const Color(0xFFf093fb).withOpacity(0.1),
+              const Color(0xFFf5576c).withOpacity(0.1),
             ],
           ),
           border: Border.all(
-            color: Color(0xFFf5576c).withOpacity(0.3),
+            color: const Color(0xFFf5576c).withOpacity(0.3),
             width: 2,
           ),
           boxShadow: [
             BoxShadow(
-              color: Color(0xFFf5576c).withOpacity(0.1),
+              color: const Color(0xFFf5576c).withOpacity(0.1),
               blurRadius: 10,
-              offset: Offset(0, 5),
+              offset: const Offset(0, 5),
             ),
           ],
         ),
@@ -585,20 +616,21 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Color(0xFFf5576c),
+                      color: const Color(0xFFf5576c),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.lock,
                       color: Colors.white,
                       size: 16,
                     ),
                   ),
-                  SizedBox(width: 10),
-                  Text(
-                    translate("One-time Password"),
+                  const SizedBox(width: 10),
+                  const Text(
+                    // Adicionado const
+                    "One-time Password",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -607,7 +639,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                   ),
                 ],
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Row(
                 children: [
                   Expanded(
@@ -615,17 +647,23 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       onDoubleTap: () {
                         if (showOneTime) {
                           Clipboard.setData(
-                              ClipboardData(text: model.serverPasswd.text));
+                            ClipboardData(text: model.serverPasswd.text),
+                          );
                           showToast(translate("Copied"));
                         }
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 15),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 15,
+                        ),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                          color: Theme.of(
+                            context,
+                          ).scaffoldBackgroundColor.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: Color(0xFFf5576c).withOpacity(0.2),
+                            color: const Color(0xFFf5576c).withOpacity(0.2),
                           ),
                         ),
                         child: Text(
@@ -634,34 +672,40 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 3,
-                            color: Theme.of(context).textTheme.titleLarge?.color,
+                            color:
+                                Theme.of(context).textTheme.titleLarge?.color,
                           ),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   if (showOneTime)
                     Container(
                       decoration: BoxDecoration(
-                        color: Color(0xFFf5576c).withOpacity(0.1),
+                        color: const Color(0xFFf5576c).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: AnimatedRotationWidget(
                         onPressed: () => bind.mainUpdateTemporaryPassword(),
                         child: Tooltip(
                           message: translate('Refresh Password'),
-                          child: Obx(() => Container(
-                            padding: EdgeInsets.all(8),
-                            child: Icon(
-                              Icons.refresh,
-                              color: refreshHover.value
-                                  ? Color(0xFFf5576c)
-                                  : Color(0xFFf5576c).withOpacity(0.7),
-                              size: 22,
+                          child: Obx(
+                            () => Container(
+                              padding: const EdgeInsets.all(8),
+                              child: Icon(
+                                Icons.refresh,
+                                color:
+                                    refreshHover.value
+                                        ? const Color(0xFFf5576c)
+                                        : const Color(
+                                          0xFFf5576c,
+                                        ).withOpacity(0.7),
+                                size: 22,
+                              ),
                             ),
-                          )),
+                          ),
                         ),
                         onHover: (value) => refreshHover.value = value,
                       ),
@@ -669,7 +713,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                   if (!bind.isDisableSettings())
                     Container(
                       decoration: BoxDecoration(
-                        color: Color(0xFFf5576c).withOpacity(0.1),
+                        color: const Color(0xFFf5576c).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: InkWell(
@@ -677,19 +721,24 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                           message: translate('Change Password'),
                           child: Obx(
                             () => Container(
-                              padding: EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(8),
                               child: Icon(
                                 Icons.edit,
-                                color: editHover.value
-                                    ? Color(0xFFf5576c)
-                                    : Color(0xFFf5576c).withOpacity(0.7),
+                                color:
+                                    editHover.value
+                                        ? const Color(0xFFf5576c)
+                                        : const Color(
+                                          0xFFf5576c,
+                                        ).withOpacity(0.7),
                                 size: 22,
                               ),
                             ),
                           ),
                         ),
-                        onTap: () => DesktopSettingPage.switch2page(
-                            SettingsTabKey.safety),
+                        onTap:
+                            () => DesktopSettingPage.switch2page(
+                              SettingsTabKey.safety,
+                            ),
                         onHover: (value) => editHover.value = value,
                       ),
                     ),
@@ -703,35 +752,30 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   buildTip(BuildContext context) {
+    // A função buildTip já tinha o Padding correto, sem marginSymmetric.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
       child: Container(
-        padding: EdgeInsets.all(15),
+        padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           gradient: LinearGradient(
             colors: [
-              Color(0xFF667eea).withOpacity(0.1),
-              Color(0xFF764ba2).withOpacity(0.1),
+              const Color(0xFF667eea).withOpacity(0.1),
+              const Color(0xFF764ba2).withOpacity(0.1),
             ],
           ),
-          border: Border.all(
-            color: Color(0xFF667eea).withOpacity(0.3),
-          ),
+          border: Border.all(color: const Color(0xFF667eea).withOpacity(0.3)),
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.info_outline,
-              color: Color(0xFF667eea),
-              size: 24,
-            ),
-            SizedBox(width: 12),
+            const Icon(Icons.info_outline, color: Color(0xFF667eea), size: 24),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 'Este dispositivo está configurado para receber conexões remotas da de Bruin SISTEMAS.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Color(0xFF667eea),
+                  color: const Color(0xFF667eea),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -745,7 +789,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   Widget buildHelpCards(String updateUrl) {
     // REMOVIDO: Cards de atualização do RustDesk
     // REMOVIDO: Links para download do RustDesk
-    
+
     if (systemError.isNotEmpty) {
       return buildInstallCard("", systemError, "", () {});
     }
@@ -754,50 +798,75 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       if (!bind.mainIsInstalled()) {
         // Mensagem personalizada da deBruin
         return buildInstallCard(
-            "de Bruin SISTEMAS", 
-            "Para melhor experiência, instale o serviço de Bruin Remote Access.", 
-            "Instalar Serviço",
-            () async {
-          await rustDeskWinManager.closeAllSubWindows();
-          bind.mainGotoInstall();
-        });
+          "de Bruin SISTEMAS",
+          "Para melhor experiência, instale o serviço de Bruin Remote Access.",
+          "Instalar Serviço",
+          () async {
+            await rustDeskWinManager.closeAllSubWindows();
+            bind.mainGotoInstall();
+          },
+        );
       } else if (bind.mainIsInstalledLowerVersion()) {
         return buildInstallCard(
-            "de Bruin SISTEMAS", 
-            "Uma versão mais recente do de Bruin Remote Access está disponível.", 
-            "Entre em contato com o Suporte",
-            () async {
-          await rustDeskWinManager.closeAllSubWindows();
-          bind.mainUpdateMe();
-        });
+          "de Bruin SISTEMAS",
+          "Uma versão mais recente do de Bruin Remote Access está disponível.",
+          "Entre em contato com o Suporte",
+          () async {
+            await rustDeskWinManager.closeAllSubWindows();
+            bind.mainUpdateMe();
+          },
+        );
       }
     } else if (isMacOS) {
       final isOutgoingOnly = bind.isOutgoingOnly();
       if (!(isOutgoingOnly || bind.mainIsCanScreenRecording(prompt: false))) {
-        return buildInstallCard("Permissões", "Para funcionar corretamente, configure as permissões de tela.", "Configurar",
-            () async {
-          bind.mainIsCanScreenRecording(prompt: true);
-          watchIsCanScreenRecording = true;
-        }, help: 'Ajuda', link: translate("doc_mac_permission"));
+        return buildInstallCard(
+          "Permissões",
+          "Para funcionar corretamente, configure as permissões de tela.",
+          "Configurar",
+          () async {
+            bind.mainIsCanScreenRecording(prompt: true);
+            watchIsCanScreenRecording = true;
+          },
+          help: 'Ajuda',
+          link: translate("doc_mac_permission"),
+        );
       } else if (!isOutgoingOnly && !bind.mainIsProcessTrusted(prompt: false)) {
-        return buildInstallCard("Permissões", "Configure as permissões de acessibilidade.", "Configurar",
-            () async {
-          bind.mainIsProcessTrusted(prompt: true);
-          watchIsProcessTrust = true;
-        }, help: 'Ajuda', link: translate("doc_mac_permission"));
+        return buildInstallCard(
+          "Permissões",
+          "Configure as permissões de acessibilidade.",
+          "Configurar",
+          () async {
+            bind.mainIsProcessTrusted(prompt: true);
+            watchIsProcessTrust = true;
+          },
+          help: 'Ajuda',
+          link: translate("doc_mac_permission"),
+        );
       } else if (!bind.mainIsCanInputMonitoring(prompt: false)) {
-        return buildInstallCard("Permissões", "Configure as permissões de monitoramento de entrada.", "Configurar",
-            () async {
-          bind.mainIsCanInputMonitoring(prompt: true);
-          watchIsInputMonitoring = true;
-        }, help: 'Ajuda', link: translate("doc_mac_permission"));
+        return buildInstallCard(
+          "Permissões",
+          "Configure as permissões de monitoramento de entrada.",
+          "Configurar",
+          () async {
+            bind.mainIsCanInputMonitoring(prompt: true);
+            watchIsInputMonitoring = true;
+          },
+          help: 'Ajuda',
+          link: translate("doc_mac_permission"),
+        );
       } else if (!isOutgoingOnly &&
           !svcStopped.value &&
           bind.mainIsInstalled() &&
           !bind.mainIsInstalledDaemon(prompt: false)) {
-        return buildInstallCard("Serviço", "Instale o daemon para melhor funcionamento.", "Instalar", () async {
-          bind.mainIsInstalledDaemon(prompt: true);
-        });
+        return buildInstallCard(
+          "Serviço",
+          "Instale o daemon para melhor funcionamento.",
+          "Instalar",
+          () async {
+            bind.mainIsInstalledDaemon(prompt: true);
+          },
+        );
       }
     } else if (isLinux) {
       if (bind.isOutgoingOnly()) {
@@ -807,58 +876,68 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       if (bind.isSelinuxEnforcing()) {
         final keyShowSelinuxHelpTip = "show-selinux-help-tip";
         if (bind.mainGetLocalOption(key: keyShowSelinuxHelpTip) != 'N') {
-          LinuxCards.add(buildInstallCard(
+          LinuxCards.add(
+            buildInstallCard(
+              "Aviso",
+              "SELinux pode interferir no funcionamento. Configure as permissões necessárias.",
+              "",
+              () async {},
+              marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
+              help: 'Ajuda',
+              link:
+                  'https://rustdesk.com/docs/en/client/linux/#permissions-issue',
+              closeButton: true,
+              closeOption: keyShowSelinuxHelpTip,
+            ),
+          );
+        }
+      }
+      if (bind.mainCurrentIsWayland()) {
+        LinuxCards.add(
+          buildInstallCard(
             "Aviso",
-            "SELinux pode interferir no funcionamento. Configure as permissões necessárias.",
+            "Wayland pode ter limitações. Recomendamos X11 para melhor compatibilidade.",
             "",
             () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
             help: 'Ajuda',
-            link: 'https://rustdesk.com/docs/en/client/linux/#permissions-issue',
-            closeButton: true,
-            closeOption: keyShowSelinuxHelpTip,
-          ));
-        }
-      }
-      if (bind.mainCurrentIsWayland()) {
-        LinuxCards.add(buildInstallCard(
-            "Aviso", "Wayland pode ter limitações. Recomendamos X11 para melhor compatibilidade.", "", () async {},
-            marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
-            help: 'Ajuda',
-            link: 'https://rustdesk.com/docs/en/client/linux/#x11-required'));
+            link: 'https://rustdesk.com/docs/en/client/linux/#x11-required',
+          ),
+        );
       } else if (bind.mainIsLoginWayland()) {
-        LinuxCards.add(buildInstallCard("Aviso",
-            "Tela de login Wayland não é suportada.", "", () async {},
+        LinuxCards.add(
+          buildInstallCard(
+            "Aviso",
+            "Tela de login Wayland não é suportada.",
+            "",
+            () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
             help: 'Ajuda',
-            link: 'https://rustdesk.com/docs/en/client/linux/#login-screen'));
-      }
-      if (LinuxCards.isNotEmpty) {
-        return Column(
-          children: LinuxCards,
+            link: 'https://rustdesk.com/docs/en/client/linux/#login-screen',
+          ),
         );
       }
+      if (LinuxCards.isNotEmpty) {
+        return Column(children: LinuxCards);
+      }
     }
-    
+
     // Botão de sair personalizado para modo incoming-only
     if (bind.isIncomingOnly()) {
       return Align(
         alignment: Alignment.centerRight,
         child: Container(
-          margin: EdgeInsets.all(14),
+          margin: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFFf093fb),
-                Color(0xFFf5576c),
-              ],
+            gradient: const LinearGradient(
+              colors: [Color(0xFFf093fb), Color(0xFFf5576c)],
             ),
             boxShadow: [
               BoxShadow(
-                color: Color(0xFFf5576c).withOpacity(0.3),
+                color: const Color(0xFFf5576c).withOpacity(0.3),
                 blurRadius: 10,
-                offset: Offset(0, 5),
+                offset: const Offset(0, 5),
               ),
             ],
           ),
@@ -873,17 +952,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
               elevation: 0,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Sair',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
         ),
@@ -892,13 +968,17 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     return Container();
   }
 
-  Widget buildInstallCard(String title, String content, String btnText,
-      GestureTapCallback onPressed,
-      {double marginTop = 20.0,
-      String? help,
-      String? link,
-      bool? closeButton,
-      String? closeOption}) {
+  Widget buildInstallCard(
+    String title,
+    String content,
+    String btnText,
+    GestureTapCallback onPressed, {
+    double marginTop = 20.0,
+    String? help,
+    String? link,
+    bool? closeButton,
+    String? closeOption,
+  }) {
     if (bind.mainGetBuildinOption(key: kOptionHideHelpCards) == 'Y' &&
         content != 'install_daemon_tip') {
       return const SizedBox();
@@ -922,11 +1002,15 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       children: [
         Container(
           margin: EdgeInsets.fromLTRB(
-              20, marginTop, 20, bind.isIncomingOnly() ? marginTop : 0),
+            20,
+            marginTop,
+            20,
+            bind.isIncomingOnly() ? marginTop : 0,
+          ),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(15),
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: [
@@ -936,38 +1020,51 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Color.fromARGB(255, 226, 66, 188).withOpacity(0.3),
+                  color: const Color.fromARGB(
+                    255,
+                    226,
+                    66,
+                    188,
+                  ).withOpacity(0.3),
                   blurRadius: 15,
-                  offset: Offset(0, 8),
+                  offset: const Offset(0, 8),
                 ),
               ],
             ),
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (title.isNotEmpty)
                   Center(
-                    child: Text(
-                      translate(title),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    child: Padding(
+                      // Adicionado Padding
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(
+                        translate(title),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
-                    ).marginOnly(bottom: 6),
+                    ),
                   ),
                 if (content.isNotEmpty)
-                  Text(
-                    translate(content),
-                    style: TextStyle(
-                      height: 1.5,
-                      color: Colors.white,
-                      fontWeight: FontWeight.normal,
-                      fontSize: 14,
+                  Padding(
+                    // Adicionado Padding
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: Text(
+                      translate(content),
+                      style: const TextStyle(
+                        height: 1.5,
+                        color: Colors.white,
+                        fontWeight: FontWeight.normal,
+                        fontSize: 14,
+                      ),
                     ),
-                  ).marginOnly(bottom: 20),
+                  ),
                 if (btnText.isNotEmpty)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -975,10 +1072,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(25),
-                          border: Border.all(
-                            color: Colors.white,
-                            width: 2,
-                          ),
+                          border: Border.all(color: Colors.white, width: 2),
                         ),
                         child: ElevatedButton(
                           onPressed: onPressed,
@@ -986,15 +1080,17 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                             backgroundColor: Colors.transparent,
                             foregroundColor: Colors.white,
                             elevation: 0,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 30,
+                              vertical: 12,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(25),
                             ),
                           ),
                           child: Text(
                             translate(btnText),
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
@@ -1005,26 +1101,32 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                   ),
                 if (help != null)
                   Center(
-                    child: InkWell(
-                      onTap: () async => await launchUrl(Uri.parse(link!)),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 8, horizontal: 15),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          color: Colors.white.withOpacity(0.2),
-                        ),
-                        child: Text(
-                          translate(help),
-                          style: TextStyle(
-                            decoration: TextDecoration.underline,
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                    child: Padding(
+                      // Adicionado Padding
+                      padding: const EdgeInsets.only(top: 10),
+                      child: InkWell(
+                        onTap: () async => await launchUrl(Uri.parse(link!)),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 15,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: Colors.white.withOpacity(0.2),
+                          ),
+                          child: Text(
+                            translate(help),
+                            style: const TextStyle(
+                              decoration: TextDecoration.underline,
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ),
                       ),
-                    ).marginOnly(top: 10),
+                    ),
                   ),
               ],
             ),
@@ -1040,11 +1142,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                 borderRadius: BorderRadius.circular(15),
               ),
               child: IconButton(
-                icon: Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 18,
-                ),
+                icon: const Icon(Icons.close, color: Colors.white, size: 18),
                 onPressed: closeCard,
               ),
             ),
@@ -1056,51 +1154,42 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   @override
   void initState() {
     super.initState();
-    
+
     // Inicialização dos controladores de animação
     _pulseController = AnimationController(
-      duration: Duration(seconds: 2),
+      duration: const Duration(seconds: 2),
       vsync: this,
     );
     _glowController = AnimationController(
-      duration: Duration(seconds: 3),
+      duration: const Duration(seconds: 3),
       vsync: this,
     );
     _slideController = AnimationController(
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
     // Configuração das animações
-    _pulseAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
-    _glowAnimation = Tween<double>(
-      begin: 0.3,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _glowController,
-      curve: Curves.easeInOut,
-    ));
+    _glowAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
 
     _slideAnimation = Tween<Offset>(
-      begin: Offset(0, -0.1),
-      end: Offset(0, 0),
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.elasticOut,
-    ));
+      begin: const Offset(0, -0.1),
+      end: const Offset(0, 0),
+    ).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.elasticOut),
+    );
 
     // Inicia as animações
     _pulseController.repeat(reverse: true);
     _glowController.repeat(reverse: true);
     _slideController.forward();
-    
+
     _updateTimer = periodic_immediate(const Duration(seconds: 1), () async {
       await gFFI.serverModel.fetchID();
       final error = await bind.mainGetError();
@@ -1150,24 +1239,25 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     rustDeskWinManager.registerActiveWindowListener(onActiveWindowChanged);
 
     screenToMap(window_size.Screen screen) => {
-          'frame': {
-            'l': screen.frame.left,
-            't': screen.frame.top,
-            'r': screen.frame.right,
-            'b': screen.frame.bottom,
-          },
-          'visibleFrame': {
-            'l': screen.visibleFrame.left,
-            't': screen.visibleFrame.top,
-            'r': screen.visibleFrame.right,
-            'b': screen.visibleFrame.bottom,
-          },
-          'scaleFactor': screen.scaleFactor,
-        };
+      'frame': {
+        'l': screen.frame.left,
+        't': screen.frame.top,
+        'r': screen.frame.right,
+        'b': screen.frame.bottom,
+      },
+      'visibleFrame': {
+        'l': screen.visibleFrame.left,
+        't': screen.visibleFrame.top,
+        'r': screen.visibleFrame.right,
+        'b': screen.visibleFrame.bottom,
+      },
+      'scaleFactor': screen.scaleFactor,
+    };
 
     rustDeskWinManager.setMethodHandler((call, fromWindowId) async {
       debugPrint(
-          "[Main] call ${call.method} with args ${call.arguments} from window $fromWindowId");
+        "[Main] call ${call.method} with args ${call.arguments} from window $fromWindowId",
+      );
       if (call.method == kWindowMainWindowOnTop) {
         windowOnTop(null);
       } else if (call.method == kWindowGetWindowInfo) {
@@ -1179,7 +1269,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         }
       } else if (call.method == kWindowGetScreenList) {
         return jsonEncode(
-            (await window_size.getScreenList()).map(screenToMap).toList());
+          (await window_size.getScreenList()).map(screenToMap).toList(),
+        );
       } else if (call.method == kWindowActionRebuild) {
         reloadCurrentWindow();
       } else if (call.method == kWindowEventShow) {
@@ -1214,7 +1305,11 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         }
         if (windowId != null && windowType != null) {
           await rustDeskWinManager.moveTabToNewWindow(
-              windowId, args[1], args[2], windowType);
+            windowId,
+            args[1],
+            args[2],
+            windowType,
+          );
         }
       } else if (call.method == kWindowEventOpenMonitorSession) {
         final args = jsonDecode(call.arguments);
@@ -1225,12 +1320,19 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         final windowType = args['window_type'] as int;
         final screenRect = parseParamScreenRect(args);
         await rustDeskWinManager.openMonitorSession(
-            windowId, peerId, display, displayCount, screenRect, windowType);
+          windowId,
+          peerId,
+          display,
+          displayCount,
+          screenRect,
+          windowType,
+        );
       } else if (call.method == kWindowEventRemoteWindowCoords) {
         final windowId = int.tryParse(call.arguments);
         if (windowId != null) {
           return jsonEncode(
-              await rustDeskWinManager.getOtherRemoteWindowCoords(windowId));
+            await rustDeskWinManager.getOtherRemoteWindowCoords(windowId),
+          );
         }
       }
     });
@@ -1260,6 +1362,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
 
   @override
   void dispose() {
+    // Dispõe os controladores de animação
     _pulseController.dispose();
     _glowController.dispose();
     _slideController.dispose();
@@ -1287,7 +1390,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         children: [
           ...entries.map((entry) {
             return entry.value;
-          })
+          }),
         ],
       ),
     );
@@ -1351,68 +1454,83 @@ void setPasswordDialog({VoidCallback? notEmptyCallback}) async {
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                        labelText: translate('Password'),
-                        errorText: errMsg0.isNotEmpty ? errMsg0 : null),
-                    controller: p0,
-                    autofocus: true,
-                    onChanged: (value) {
-                      rxPass.value = value.trim();
-                      setState(() {
-                        errMsg0 = '';
-                      });
-                    },
-                    maxLength: maxLength,
-                  ).workaroundFreezeLinuxMint(),
+                  child:
+                      TextField(
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: translate('Password'),
+                          errorText: errMsg0.isNotEmpty ? errMsg0 : null,
+                        ),
+                        controller: p0,
+                        autofocus: true,
+                        onChanged: (value) {
+                          rxPass.value = value.trim();
+                          setState(() {
+                            errMsg0 = '';
+                          });
+                        },
+                        maxLength: maxLength,
+                      ).workaroundFreezeLinuxMint(),
                 ),
               ],
             ),
-            Row(
-              children: [
-                Expanded(child: PasswordStrengthIndicator(password: rxPass)),
-              ],
-            ).marginSymmetric(vertical: 8),
+            // CORRIGIDO: Substituído marginSymmetric por Padding
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(child: PasswordStrengthIndicator(password: rxPass)),
+                ],
+              ),
+            ),
             const SizedBox(height: 8.0),
             Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    obscureText: true,
-                    decoration: InputDecoration(
-                        labelText: translate('Confirmation'),
-                        errorText: errMsg1.isNotEmpty ? errMsg1 : null),
-                    controller: p1,
-                    onChanged: (value) {
-                      setState(() {
-                        errMsg1 = '';
-                      });
-                    },
-                    maxLength: maxLength,
-                  ).workaroundFreezeLinuxMint(),
+                  child:
+                      TextField(
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: translate('Confirmation'),
+                          errorText: errMsg1.isNotEmpty ? errMsg1 : null,
+                        ),
+                        controller: p1,
+                        onChanged: (value) {
+                          setState(() {
+                            errMsg1 = '';
+                          });
+                        },
+                        maxLength: maxLength,
+                      ).workaroundFreezeLinuxMint(),
                 ),
               ],
             ),
             const SizedBox(height: 8.0),
-            Obx(() => Wrap(
-                  runSpacing: 8,
-                  spacing: 4,
-                  children: rules.map((e) {
-                    var checked = e.validate(rxPass.value.trim());
-                    return Chip(
+            Obx(
+              () => Wrap(
+                runSpacing: 8,
+                spacing: 4,
+                children:
+                    rules.map((e) {
+                      var checked = e.validate(rxPass.value.trim());
+                      return Chip(
                         label: Text(
                           e.name,
                           style: TextStyle(
-                              color: checked
-                                  ? const Color(0xFF0A9471)
-                                  : Color.fromARGB(255, 198, 86, 157)),
+                            color:
+                                checked
+                                    ? const Color(0xFF0A9471)
+                                    : const Color.fromARGB(255, 198, 86, 157),
+                          ),
                         ),
-                        backgroundColor: checked
-                            ? const Color(0xFFD0F7ED)
-                            : Color.fromARGB(255, 247, 205, 232));
-                  }).toList(),
-                ))
+                        backgroundColor:
+                            checked
+                                ? const Color(0xFFD0F7ED)
+                                : const Color.fromARGB(255, 247, 205, 232),
+                      );
+                    }).toList(),
+              ),
+            ),
           ],
         ),
       ),
