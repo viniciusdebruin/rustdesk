@@ -140,30 +140,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         ),
       ),
       child: _buildBlock(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: buildLeftPane(context),
-            ),
-            if (!isIncomingOnly) 
-              Container(
-                width: 1,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Color(0xFF2F65BA).withOpacity(0.3),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
-          ],
-        ),
+        child: buildLeftPane(context), // APENAS o painel esquerdo (servidor)
       ),
     );
   }
@@ -178,12 +155,39 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     final isOutgoingOnly = bind.isOutgoingOnly();
     final children = <Widget>[
       SizedBox(height: 20),
-      if (!isOutgoingOnly) buildPresetPasswordWarning(),
-      if (bind.isCustomClient())
-        Align(
-          alignment: Alignment.center,
-          child: loadPowered(context),
+      
+      // Título da empresa
+      Align(
+        alignment: Alignment.center,
+        child: Column(
+          children: [
+            Text(
+              'de Bruin SISTEMAS',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                foreground: Paint()
+                  ..shader = LinearGradient(
+                    colors: [Color(0xFF2F65BA), Color(0xFF667eea)],
+                  ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
+                letterSpacing: 2.0,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Acesso Remoto Profissional',
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF667eea),
+                fontWeight: FontWeight.w500,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ],
         ),
+      ),
+      
+      SizedBox(height: 20),
       
       // Logo centralizado com efeitos épicos
       AnimatedBuilder(
@@ -199,13 +203,97 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         },
       ),
       
-      SizedBox(height: 30),
-      buildTip(context),
       SizedBox(height: 20),
       
-      // ID e Senha com visual épico
-      if (!isOutgoingOnly) buildIDBoard(context),
-      if (!isOutgoingOnly) buildPasswordBoard(context),
+      // Card de status do servidor
+      Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF4CAF50).withOpacity(0.1),
+              Color(0xFF8BC34A).withOpacity(0.1),
+            ],
+          ),
+          border: Border.all(
+            color: Color(0xFF4CAF50).withOpacity(0.3),
+            width: 2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFF4CAF50).withOpacity(0.1),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Color(0xFF4CAF50),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Icons.security,
+                  color: Colors.white,
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Servidor Ativo',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4CAF50),
+                      ),
+                    ),
+                    Text(
+                      'Aguardando conexões remotas...',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.green,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.5),
+                      blurRadius: 6,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      
+      SizedBox(height: 20),
+      
+      // Informações do servidor - sempre visível
+      buildIDBoard(context),
+      buildPasswordBoard(context),
       
       FutureBuilder<Widget>(
         future: Future.value(
@@ -319,21 +407,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
-  buildRightPane(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: RadialGradient(
-          center: Alignment.topRight,
-          radius: 2.0,
-          colors: [
-            Color(0xFF2F65BA).withOpacity(0.05),
-            Theme.of(context).scaffoldBackgroundColor,
-          ],
-        ),
-      ),
-      child: ConnectionPage(),
-    );
-  }
+  // REMOVIDO: buildRightPane - não há mais ConnectionPage
 
   buildIDBoard(BuildContext context) {
     final model = gFFI.serverModel;
@@ -629,79 +703,69 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   buildTip(BuildContext context) {
-    final isOutgoingOnly = bind.isOutgoingOnly();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (isOutgoingOnly)
-            Container(
-              padding: EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF667eea).withOpacity(0.1),
-                    Color(0xFF764ba2).withOpacity(0.1),
-                  ],
-                ),
-                border: Border.all(
-                  color: Color(0xFF667eea).withOpacity(0.3),
-                ),
-              ),
+      child: Container(
+        padding: EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF667eea).withOpacity(0.1),
+              Color(0xFF764ba2).withOpacity(0.1),
+            ],
+          ),
+          border: Border.all(
+            color: Color(0xFF667eea).withOpacity(0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: Color(0xFF667eea),
+              size: 24,
+            ),
+            SizedBox(width: 12),
+            Expanded(
               child: Text(
-                translate("outgoing_only_desk_tip"),
+                'Este dispositivo está configurado para receber conexões remotas da de Bruin SISTEMAS.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Color(0xFF667eea),
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget buildHelpCards(String updateUrl) {
-    if (!bind.isCustomClient() &&
-        updateUrl.isNotEmpty &&
-        !isCardClosed &&
-        bind.mainUriPrefixSync().contains('rustdesk')) {
-      final isToUpdate = (isWindows || isMacOS) && bind.mainIsInstalled();
-      String btnText = isToUpdate ? 'Click to update' : 'Click to download';
-      GestureTapCallback onPressed = () async {
-        final Uri url = Uri.parse('https://rustdesk.com/download');
-        await launchUrl(url);
-      };
-      if (isToUpdate) {
-        onPressed = () {
-          handleUpdate(updateUrl);
-        };
-      }
-      return buildInstallCard(
-          "Status",
-          "${translate("new-version-of-{${bind.mainGetAppNameSync()}}-tip")} (${bind.mainGetNewVersion()}).",
-          btnText,
-          onPressed,
-          closeButton: true);
-    }
+    // REMOVIDO: Cards de atualização do RustDesk
+    // REMOVIDO: Links para download do RustDesk
+    
     if (systemError.isNotEmpty) {
       return buildInstallCard("", systemError, "", () {});
     }
 
     if (isWindows && !bind.isDisableInstallation()) {
       if (!bind.mainIsInstalled()) {
+        // Mensagem personalizada da deBruin
         return buildInstallCard(
-            "", bind.isOutgoingOnly() ? "" : "install_tip", "Install",
+            "de Bruin SISTEMAS", 
+            "Para melhor experiência, instale o serviço de Bruin Remote Access.", 
+            "Instalar Serviço",
             () async {
           await rustDeskWinManager.closeAllSubWindows();
           bind.mainGotoInstall();
         });
       } else if (bind.mainIsInstalledLowerVersion()) {
         return buildInstallCard(
-            "Status", "Your installation is lower version.", "Click to upgrade",
+            "de Bruin SISTEMAS", 
+            "Uma versão mais recente do de Bruin Remote Access está disponível.", 
+            "Entre em contato com o Suporte",
             () async {
           await rustDeskWinManager.closeAllSubWindows();
           bind.mainUpdateMe();
@@ -710,28 +774,28 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     } else if (isMacOS) {
       final isOutgoingOnly = bind.isOutgoingOnly();
       if (!(isOutgoingOnly || bind.mainIsCanScreenRecording(prompt: false))) {
-        return buildInstallCard("Permissions", "config_screen", "Configure",
+        return buildInstallCard("Permissões", "Para funcionar corretamente, configure as permissões de tela.", "Configurar",
             () async {
           bind.mainIsCanScreenRecording(prompt: true);
           watchIsCanScreenRecording = true;
-        }, help: 'Help', link: translate("doc_mac_permission"));
+        }, help: 'Ajuda', link: translate("doc_mac_permission"));
       } else if (!isOutgoingOnly && !bind.mainIsProcessTrusted(prompt: false)) {
-        return buildInstallCard("Permissions", "config_acc", "Configure",
+        return buildInstallCard("Permissões", "Configure as permissões de acessibilidade.", "Configurar",
             () async {
           bind.mainIsProcessTrusted(prompt: true);
           watchIsProcessTrust = true;
-        }, help: 'Help', link: translate("doc_mac_permission"));
+        }, help: 'Ajuda', link: translate("doc_mac_permission"));
       } else if (!bind.mainIsCanInputMonitoring(prompt: false)) {
-        return buildInstallCard("Permissions", "config_input", "Configure",
+        return buildInstallCard("Permissões", "Configure as permissões de monitoramento de entrada.", "Configurar",
             () async {
           bind.mainIsCanInputMonitoring(prompt: true);
           watchIsInputMonitoring = true;
-        }, help: 'Help', link: translate("doc_mac_permission"));
+        }, help: 'Ajuda', link: translate("doc_mac_permission"));
       } else if (!isOutgoingOnly &&
           !svcStopped.value &&
           bind.mainIsInstalled() &&
           !bind.mainIsInstalledDaemon(prompt: false)) {
-        return buildInstallCard("", "install_daemon_tip", "Install", () async {
+        return buildInstallCard("Serviço", "Instale o daemon para melhor funcionamento.", "Instalar", () async {
           bind.mainIsInstalledDaemon(prompt: true);
         });
       }
@@ -744,12 +808,12 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         final keyShowSelinuxHelpTip = "show-selinux-help-tip";
         if (bind.mainGetLocalOption(key: keyShowSelinuxHelpTip) != 'N') {
           LinuxCards.add(buildInstallCard(
-            "Warning",
-            "selinux_tip",
+            "Aviso",
+            "SELinux pode interferir no funcionamento. Configure as permissões necessárias.",
             "",
             () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
-            help: 'Help',
+            help: 'Ajuda',
             link: 'https://rustdesk.com/docs/en/client/linux/#permissions-issue',
             closeButton: true,
             closeOption: keyShowSelinuxHelpTip,
@@ -758,15 +822,15 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       }
       if (bind.mainCurrentIsWayland()) {
         LinuxCards.add(buildInstallCard(
-            "Warning", "wayland_experiment_tip", "", () async {},
+            "Aviso", "Wayland pode ter limitações. Recomendamos X11 para melhor compatibilidade.", "", () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
-            help: 'Help',
+            help: 'Ajuda',
             link: 'https://rustdesk.com/docs/en/client/linux/#x11-required'));
       } else if (bind.mainIsLoginWayland()) {
-        LinuxCards.add(buildInstallCard("Warning",
-            "Login screen using Wayland is not supported", "", () async {},
+        LinuxCards.add(buildInstallCard("Aviso",
+            "Tela de login Wayland não é suportada.", "", () async {},
             marginTop: LinuxCards.isEmpty ? 20.0 : 5.0,
-            help: 'Help',
+            help: 'Ajuda',
             link: 'https://rustdesk.com/docs/en/client/linux/#login-screen'));
       }
       if (LinuxCards.isNotEmpty) {
@@ -775,6 +839,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         );
       }
     }
+    
+    // Botão de sair personalizado para modo incoming-only
     if (bind.isIncomingOnly()) {
       return Align(
         alignment: Alignment.centerRight,
@@ -813,7 +879,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
               ),
             ),
             child: Text(
-              translate('Quit'),
+              'Sair',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
