@@ -1,3 +1,52 @@
+O erro no arquivo `home_page.dart` provavelmente se deve à implementação do método `buildPage` nas classes `HomePage` e `_EpicServerPageContentState`, pois você mencionou as seguintes linhas:
+
+```dart
+// ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 1
+  @override
+  Widget buildPage(BuildContext context) {
+    return Container(); // ou a UI correta
+  }
+```
+
+e
+
+```dart
+// ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 3
+  @override
+  Widget buildPage(BuildContext context) {
+    return build(context); // ou Container();
+  }
+```
+
+O problema é que `PageShape` é uma `StatelessWidget`, e `HomePage` e `EpicServerPageContent` são `StatefulWidget` (ou têm `State` classes associadas que deveriam implementar a UI).
+
+A classe `PageShape` já possui um método `build` que chama `buildPage(context)`:
+
+```dart
+abstract class PageShape extends StatelessWidget {
+  String get title => "";
+  Widget get icon => Icon(null);
+  List<Widget> get appBarActions => [];
+  
+  // ✅ MUDANDO PARA buildPage() EM VEZ DE build()
+  Widget buildPage(BuildContext context);
+  
+  @override
+  Widget build(BuildContext context) {
+    return buildPage(context);
+  }
+}
+```
+
+Isso significa que as classes que estendem `PageShape` (como `EpicServerPage`, `ChatPageWrapper`, `SettingsPageWrapper`, `WebHomePage`) devem implementar `buildPage(BuildContext context)`.
+
+No entanto, `HomePage` e `_EpicServerPageContentState` são partes da implementação interna e não devem estender `PageShape` ou implementar `buildPage` nesse contexto, pois já possuem seus próprios métodos `build` nativos do Flutter para `StatefulWidget` e `State`.
+
+**Para corrigir o erro, remova os métodos `buildPage` das classes `HomePage` e `_EpicServerPageContentState`.**
+
+Aqui está o arquivo `home_page.dart` corrigido:
+
+```dart
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -50,11 +99,11 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late Animation<double> _logoAnimation;
   late Animation<double> _gradientAnimation;
 
-  // ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 1
-  @override
-  Widget buildPage(BuildContext context) {
-    return Container(); // ou a UI correta
-  }
+  // REMOVIDO: ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 1 - HomePage não deve ter buildPage()
+  // @override
+  // Widget buildPage(BuildContext context) {
+  //   return Container(); // ou a UI correta
+  // }
 
   void refreshPages() {
     setState(() {
@@ -455,11 +504,11 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
-  // ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 3
-  @override
-  Widget buildPage(BuildContext context) {
-    return build(context); // ou Container();
-  }
+  // REMOVIDO: ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 3 - _EpicServerPageContentState não deve ter buildPage()
+  // @override
+  // Widget buildPage(BuildContext context) {
+  //   return build(context); // ou Container();
+  // }
 
   @override
   void initState() {
@@ -1106,3 +1155,4 @@ class WebHomePage extends PageShape {
       ),
     );
   }
+}
