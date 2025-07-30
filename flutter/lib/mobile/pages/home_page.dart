@@ -919,190 +919,332 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
       ),
     );
   }
-}Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Servidor Ativo',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF2F65BA),
+}                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Servidor Ativo',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF4CAF50),
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  'Aguardando conexões...',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
+                                  Text(
+                                    'Aguardando conexões remotas...',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.green,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.green.withOpacity(0.5),
-                                  blurRadius: 6,
-                                  spreadRadius: 2,
-                                ),
-                              ],
+                            Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.green,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green.withOpacity(0.5),
+                                    blurRadius: 6,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       
                       SizedBox(height: 25),
                       
-                      // Informações de conexão
+                      // Card do ID do servidor - integrado com dados reais
                       Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(20),
+                        margin: EdgeInsets.symmetric(horizontal: 5),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                            color: Color(0xFF2F65BA).withOpacity(0.2),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              'ID do Dispositivo',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF2F65BA),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              '123456789', // Substituir pelo ID real
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 3,
-                                color: Theme.of(context).textTheme.titleLarge?.color,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      SizedBox(height: 20),
-                      
-                      // Botão de configurações
-                      Container(
-                        width: double.infinity,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(20),
                           gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                             colors: [
-                              Color(0xFF2F65BA),
-                              Color(0xFF667eea),
+                              Color(0xFF667eea).withOpacity(0.1),
+                              Color(0xFF764ba2).withOpacity(0.1),
                             ],
+                          ),
+                          border: Border.all(
+                            color: Color(0xFF2F65BA).withOpacity(0.3),
+                            width: 2,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Color(0xFF2F65BA).withOpacity(0.3),
+                              color: Color(0xFF2F65BA).withOpacity(0.1),
                               blurRadius: 15,
-                              offset: Offset(0, 5),
+                              offset: Offset(0, 8),
                             ),
                           ],
                         ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Navegar para configurações
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                        child: Padding(
+                          padding: EdgeInsets.all(25),
+                          child: Column(
                             children: [
-                              Icon(
-                                Icons.settings,
-                                color: Colors.white,
-                                size: 20,
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFF2F65BA),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      Icons.computer,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'ID do Dispositivo',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF2F65BA),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Toque para copiar',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: 10),
-                              Text(
-                                'Configurações do Servidor',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+                              
+                              SizedBox(height: 20),
+                              
+                              // ID real do servidor
+                              GestureDetector(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(text: model.serverId.text));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('ID copiado para a área de transferência'),
+                                      backgroundColor: Color(0xFF4CAF50),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(
+                                      color: Color(0xFF2F65BA).withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    model.serverId.text.isNotEmpty ? model.serverId.text : 'Carregando...',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 3,
+                                      color: Theme.of(context).textTheme.titleLarge?.color,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
+                      
+                      SizedBox(height: 25),
+                      
+                      // Card da senha - integrado com dados reais
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFFf093fb).withOpacity(0.1),
+                              Color(0xFFf5576c).withOpacity(0.1),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: Color(0xFFf5576c).withOpacity(0.3),
+                            width: 2,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xFFf5576c).withOpacity(0.1),
+                              blurRadius: 15,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(25),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFf5576c),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      Icons.lock,
+                                      color: Colors.white,
+                                      size: 24,
+                                    ),
+                                  ),
+                                  SizedBox(width: 15),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Senha de Acesso',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFFf5576c),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Toque para copiar',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Botão de atualizar senha
+                                  GestureDetector(
+                                    onTap: () => bind.mainUpdateTemporaryPassword(),
+                                    child: Container(
+                                      padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFf5576c).withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Icon(
+                                        Icons.refresh,
+                                        color: Color(0xFFf5576c),
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              
+                              SizedBox(height: 20),
+                              
+                              // Senha real do servidor
+                              GestureDetector(
+                                onTap: () {
+                                  Clipboard.setData(ClipboardData(text: model.serverPasswd.text));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Senha copiada para a área de transferência'),
+                                      backgroundColor: Color(0xFFf5576c),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(15),
+                                    border: Border.all(
+                                      color: Color(0xFFf5576c).withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    model.serverPasswd.text.isNotEmpty ? model.serverPasswd.text : 'Carregando...',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 4,
+                                      color: Theme.of(context).textTheme.titleLarge?.color,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 30),
+                      
+                      // Informações da empresa
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 5),
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xFF667eea).withOpacity(0.1),
+                              Color(0xFF764ba2).withOpacity(0.1),
+                            ],
+                          ),
+                          border: Border.all(
+                            color: Color(0xFF667eea).withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Color(0xFF667eea),
+                              size: 24,
+                            ),
+                            SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Este dispositivo está configurado para receber conexões remotas da de Bruin SISTEMAS.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF667eea),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
-              
-              SizedBox(height: 30),
-              
-              // Informações da empresa
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 10),
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFFf093fb).withOpacity(0.1),
-                      Color(0xFFf5576c).withOpacity(0.1),
-                    ],
-                  ),
-                  border: Border.all(
-                    color: Color(0xFFf5576c).withOpacity(0.3),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.business,
-                      color: Color(0xFFf5576c),
-                      size: 40,
-                    ),
-                    SizedBox(height: 15),
-                    Text(
-                      'Soluções Empresariais',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFFf5576c),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Acesso remoto seguro e confiável para empresas.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
