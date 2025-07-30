@@ -20,9 +20,7 @@ abstract class PageShape extends Widget {
 
 class HomePage extends StatefulWidget {
   static final homeKey = GlobalKey<HomePageState>();
-
   HomePage() : super(key: homeKey);
-
   @override
   HomePageState createState() => HomePageState();
 }
@@ -32,11 +30,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
   int _chatPageTabIndex = -1;
-  bool get isChatPageCurrentTab => isAndroid
-      ? _selectedIndex == _chatPageTabIndex
-      : false;
+  bool get isChatPageCurrentTab => isAndroid ? _selectedIndex == _chatPageTabIndex : false;
 
-  // Controladores de animação
   late AnimationController _logoController;
   late AnimationController _gradientController;
   late Animation<double> _logoAnimation;
@@ -53,33 +48,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     initPages();
     
-    // Inicializar animações
-    _logoController = AnimationController(
-      duration: Duration(seconds: 3),
-      vsync: this,
-    );
-    _gradientController = AnimationController(
-      duration: Duration(seconds: 4),
-      vsync: this,
-    );
+    _logoController = AnimationController(duration: Duration(seconds: 3), vsync: this);
+    _gradientController = AnimationController(duration: Duration(seconds: 4), vsync: this);
 
-    _logoAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _logoController,
-      curve: Curves.easeInOut,
-    ));
+    _logoAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _logoController, curve: Curves.easeInOut));
+    _gradientAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(parent: _gradientController, curve: Curves.easeInOut));
 
-    _gradientAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _gradientController,
-      curve: Curves.easeInOut,
-    ));
-
-    // Iniciar animações
     _logoController.repeat(reverse: true);
     _gradientController.repeat(reverse: true);
   }
@@ -93,18 +67,11 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void initPages() {
     _pages.clear();
-    
-    // REMOVIDO: Não permitir conexões de saída (cliente)
-    // APENAS servidor - funcionalidade principal
     _pages.add(EpicServerPage());
-    
-    // Chat para comunicação durante acesso remoto
     if (isAndroid && !bind.isOutgoingOnly()) {
       _chatPageTabIndex = _pages.length;
       _pages.add(ChatPage(type: ChatPageType.mobileMain));
     }
-    
-    // Configurações
     _pages.add(SettingsPage());
   }
 
@@ -122,7 +89,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         return false;
       },
       child: Scaffold(
-        // Background gradiente épico
         body: AnimatedBuilder(
           animation: _gradientController,
           builder: (context, child) {
@@ -160,78 +126,16 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF2F65BA).withOpacity(0.9),
-              Color(0xFF667eea).withOpacity(0.8),
-            ],
+            colors: [Color(0xFF2F65BA).withOpacity(0.9), Color(0xFF667eea).withOpacity(0.8)],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0xFF2F65BA).withOpacity(0.3),
-              blurRadius: 10,
-              offset: Offset(0, 3),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: Color(0xFF2F65BA).withOpacity(0.3), blurRadius: 10, offset: Offset(0, 3))],
         ),
       ),
       centerTitle: true,
       title: AnimatedBuilder(
         animation: _logoController,
         builder: (context, child) {
-          return Transform.scale(
-            scale: _logoAnimation.value,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.3),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      'assets/images/de Bruin_remote_access_logo.jpg',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'de Bruin',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    Text(
-                      'SISTEMAS',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
+          return Transform.scale(scale: _logoAnimation.value, child: appTitle());
         },
       ),
       actions: _pages.isNotEmpty ? _pages.elementAt(_selectedIndex).appBarActions : [],
@@ -244,58 +148,38 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF2F65BA).withOpacity(0.95),
-            Color(0xFF667eea).withOpacity(0.9),
-          ],
+          colors: [Color(0xFF2F65BA).withOpacity(0.95), Color(0xFF667eea).withOpacity(0.9)],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0xFF2F65BA).withOpacity(0.3),
-            blurRadius: 15,
-            offset: Offset(0, -5),
-          ),
-        ],
+        boxShadow: [BoxShadow(color: Color(0xFF2F65BA).withOpacity(0.3), blurRadius: 15, offset: Offset(0, -5))],
       ),
       child: BottomNavigationBar(
         key: navigationBarKey,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        items: _pages
-            .map((page) => BottomNavigationBarItem(
-                  icon: Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: _pages.indexOf(page) == _selectedIndex
-                          ? Colors.white.withOpacity(0.2)
-                          : Colors.transparent,
-                    ),
-                    child: page.icon,
-                  ),
-                  label: page.title,
-                ))
-            .toList(),
+        items: _pages.map((page) => BottomNavigationBarItem(
+          icon: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: _pages.indexOf(page) == _selectedIndex ? Colors.white.withOpacity(0.2) : Colors.transparent,
+            ),
+            child: page.icon,
+          ),
+          label: page.title,
+        )).toList(),
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
         selectedItemColor: Colors.white,
         unselectedItemColor: Colors.white.withOpacity(0.6),
-        selectedLabelStyle: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
-        unselectedLabelStyle: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 11,
-        ),
+        selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
         onTap: (index) => setState(() {
           if (_selectedIndex != index) {
             _selectedIndex = index;
             if (isChatPageCurrentTab) {
               gFFI.chatModel.hideChatIconOverlay();
               gFFI.chatModel.hideChatWindowOverlay();
-              gFFI.chatModel.mobileClearClientUnread(
-                  gFFI.chatModel.currentKey.connId);
+              gFFI.chatModel.mobileClearClientUnread(gFFI.chatModel.currentKey.connId);
             }
           }
         }),
@@ -306,41 +190,25 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget appTitle() {
     final currentUser = gFFI.chatModel.currentUser;
     final currentKey = gFFI.chatModel.currentKey;
-    if (isChatPageCurrentTab &&
-        currentUser != null &&
-        currentKey.peerId.isNotEmpty) {
-      final connected =
-          gFFI.serverModel.clients.any((e) => e.id == currentKey.connId);
+    if (isChatPageCurrentTab && currentUser != null && currentKey.peerId.isNotEmpty) {
+      final connected = gFFI.serverModel.clients.any((e) => e.id == currentKey.connId);
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Tooltip(
-            message: currentKey.isOut
-                ? translate('Outgoing connection')
-                : translate('Incoming connection'),
-            child: Icon(
-              currentKey.isOut
-                  ? Icons.call_made_rounded
-                  : Icons.call_received_rounded,
-              color: Colors.white,
-            ),
+            message: currentKey.isOut ? translate('Outgoing connection') : translate('Incoming connection'),
+            child: Icon(currentKey.isOut ? Icons.call_made_rounded : Icons.call_received_rounded, color: Colors.white),
           ),
           Expanded(
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    "${currentUser.firstName}   ${currentUser.id}",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  Text("${currentUser.firstName}   ${currentUser.id}", style: TextStyle(color: Colors.white)),
                   if (connected)
                     Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color.fromARGB(255, 133, 246, 199)),
+                      width: 10, height: 10,
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: Color.fromARGB(255, 133, 246, 199)),
                     ).marginSymmetric(horizontal: 2),
                 ],
               ),
@@ -353,24 +221,14 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: 40, height: 40,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.white.withOpacity(0.3),
-                blurRadius: 8,
-                spreadRadius: 2,
-              ),
-            ],
+            boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.3), blurRadius: 8, spreadRadius: 2)],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              'assets/images/de Bruin_remote_access_logo.jpg',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('assets/images/debruin_remote_access_logo.jpg', fit: BoxFit.cover),
           ),
         ),
         SizedBox(width: 12),
@@ -378,24 +236,8 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'de Bruin',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.2,
-              ),
-            ),
-            Text(
-              'SISTEMAS',
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.9),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                letterSpacing: 2.0,
-              ),
-            ),
+            Text('de Bruin', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+            Text('SISTEMAS', style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 2.0)),
           ],
         ),
       ],
@@ -403,7 +245,6 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 }
 
-// Página customizada do servidor com visual épico
 class EpicServerPage extends PageShape {
   @override
   final String title = "de Bruin Server";
@@ -421,25 +262,15 @@ class EpicServerPageContent extends StatefulWidget {
   _EpicServerPageContentState createState() => _EpicServerPageContentState();
 }
 
-class _EpicServerPageContentState extends State<EpicServerPageContent>
-    with TickerProviderStateMixin {
+class _EpicServerPageContentState extends State<EpicServerPageContent> with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
-    _pulseController = AnimationController(
-      duration: Duration(seconds: 2),
-      vsync: this,
-    );
-    _pulseAnimation = Tween<double>(
-      begin: 0.95,
-      end: 1.05,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _pulseController = AnimationController(duration: Duration(seconds: 2), vsync: this);
+    _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
     _pulseController.repeat(reverse: true);
   }
 
@@ -463,453 +294,56 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                 child: Column(
                   children: [
                     SizedBox(height: 20),
-                    
-                    // Logo principal épico
                     AnimatedBuilder(
                       animation: _pulseController,
                       builder: (context, child) {
                         return Transform.scale(
                           scale: _pulseAnimation.value,
                           child: Container(
-                            width: 200,
-                            height: 200,
+                            width: 200, height: 200,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(30),
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [
-                                  Color(0xFF667eea).withOpacity(0.3),
-                                  Color(0xFF764ba2).withOpacity(0.3),
-                                ],
+                                colors: [Color(0xFF667eea).withOpacity(0.3), Color(0xFF764ba2).withOpacity(0.3)],
                               ),
                               boxShadow: [
-                                BoxShadow(
-                                  color: Color(0xFF2F65BA).withOpacity(0.4),
-                                  blurRadius: 30,
-                                  spreadRadius: 5,
-                                ),
-                                BoxShadow(
-                                  color: Colors.white.withOpacity(0.1),
-                                  blurRadius: 50,
-                                  spreadRadius: 10,
-                                ),
+                                BoxShadow(color: Color(0xFF2F65BA).withOpacity(0.4), blurRadius: 30, spreadRadius: 5),
+                                BoxShadow(color: Colors.white.withOpacity(0.1), blurRadius: 50, spreadRadius: 10),
                               ],
-                              border: Border.all(
-                                color: Color(0xFF2F65BA).withOpacity(0.3),
-                                width: 3,
-                              ),
+                              border: Border.all(color: Color(0xFF2F65BA).withOpacity(0.3), width: 3),
                             ),
                             child: Padding(
                               padding: EdgeInsets.all(20),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
-                                child: Image.asset(
-                                  'assets/images/de Bruin_remote_access_logo.jpg',
-                                  fit: BoxFit.contain,
-                                ),
+                                child: Image.asset('assets/images/debruin_remote_access_logo.jpg', fit: BoxFit.contain),
                               ),
                             ),
                           ),
                         );
                       },
                     ),
-                    
                     SizedBox(height: 30),
-                    
-                    // Título épico
                     Text(
                       'de Bruin SISTEMAS',
                       style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        foreground: Paint()
-                          ..shader = LinearGradient(
-                            colors: [Color(0xFF2F65BA), Color(0xFF667eea)],
-                          ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
-                        letterSpacing: 2.0,
+                        fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 2.0,
+                        foreground: Paint()..shader = LinearGradient(colors: [Color(0xFF2F65BA), Color(0xFF667eea)]).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0)),
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    
                     SizedBox(height: 10),
-                    
-                    Text(
-                      'Acesso Remoto Profissional',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF667eea),
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 1.0,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    
+                    Text('Acesso Remoto Profissional', style: TextStyle(fontSize: 16, color: Color(0xFF667eea), fontWeight: FontWeight.w500, letterSpacing: 1.0), textAlign: TextAlign.center),
                     SizedBox(height: 30),
-                    
-                    // Card de status do servidor
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF4CAF50).withOpacity(0.1),
-                            Color(0xFF8BC34A).withOpacity(0.1),
-                          ],
-                        ),
-                        border: Border.all(
-                          color: Color(0xFF4CAF50).withOpacity(0.3),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xFF4CAF50).withOpacity(0.1),
-                            blurRadius: 15,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(20),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Color(0xFF4CAF50),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                Icons.security,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                            SizedBox(width: 15),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Servidor Ativo',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF4CAF50),
-                                    ),
-                                  ),
-                                  Text(
-                                    'Aguardando conexões remotas...',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.green,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.green.withOpacity(0.5),
-                                    blurRadius: 6,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
+                    _buildStatusCard(),
                     SizedBox(height: 25),
-                    
-                    // Card do ID do servidor - integrado com dados reais
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF667eea).withOpacity(0.1),
-                            Color(0xFF764ba2).withOpacity(0.1),
-                          ],
-                        ),
-                        border: Border.all(
-                          color: Color(0xFF2F65BA).withOpacity(0.3),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xFF2F65BA).withOpacity(0.1),
-                            blurRadius: 15,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(25),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFF2F65BA),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    Icons.computer,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                ),
-                                SizedBox(width: 15),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'ID do Dispositivo',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFF2F65BA),
-                                        ),
-                                      ),
-                                      Text(
-                                        'Toque para copiar',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            
-                            SizedBox(height: 20),
-                            
-                            // ID real do servidor
-                            GestureDetector(
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(text: model.serverId.text));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('ID copiado para a área de transferência'),
-                                    backgroundColor: Color(0xFF4CAF50),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(
-                                    color: Color(0xFF2F65BA).withOpacity(0.2),
-                                  ),
-                                ),
-                                child: Text(
-                                  model.serverId.text.isNotEmpty ? model.serverId.text : 'Carregando...',
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 3,
-                                    color: Theme.of(context).textTheme.titleLarge?.color,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
+                    _buildIDCard(context, model),
                     SizedBox(height: 25),
-                    
-                    // Card da senha - integrado com dados reais
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFFf093fb).withOpacity(0.1),
-                            Color(0xFFf5576c).withOpacity(0.1),
-                          ],
-                        ),
-                        border: Border.all(
-                          color: Color(0xFFf5576c).withOpacity(0.3),
-                          width: 2,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xFFf5576c).withOpacity(0.1),
-                            blurRadius: 15,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(25),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xFFf5576c),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    Icons.lock,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                ),
-                                SizedBox(width: 15),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Senha de Acesso',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Color(0xFFf5576c),
-                                        ),
-                                      ),
-                                      Text(
-                                        'Toque para copiar',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                // Botão de atualizar senha
-                                GestureDetector(
-                                  onTap: () => bind.mainUpdateTemporaryPassword(),
-                                  child: Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFf5576c).withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Icon(
-                                      Icons.refresh,
-                                      color: Color(0xFFf5576c),
-                                      size: 20,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            
-                            SizedBox(height: 20),
-                            
-                            // Senha real do servidor
-                            GestureDetector(
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(text: model.serverPasswd.text));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Senha copiada para a área de transferência'),
-                                    backgroundColor: Color(0xFFf5576c),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(15),
-                                  border: Border.all(
-                                    color: Color(0xFFf5576c).withOpacity(0.2),
-                                  ),
-                                ),
-                                child: Text(
-                                  model.serverPasswd.text.isNotEmpty ? model.serverPasswd.text : 'Carregando...',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 4,
-                                    color: Theme.of(context).textTheme.titleLarge?.color,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
+                    _buildPasswordCard(context, model),
                     SizedBox(height: 30),
-                    
-                    // Informações da empresa
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 5),
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF667eea).withOpacity(0.1),
-                            Color(0xFF764ba2).withOpacity(0.1),
-                          ],
-                        ),
-                        border: Border.all(
-                          color: Color(0xFF667eea).withOpacity(0.3),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: Color(0xFF667eea),
-                            size: 24,
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Este dispositivo está configurado para receber conexões remotas da de Bruin SISTEMAS.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color(0xFF667eea),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildInfoCard(),
                   ],
                 ),
               ),
@@ -919,340 +353,177 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
       ),
     );
   }
-}                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Servidor Ativo',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF4CAF50),
-                                    ),
-                                  ),
-                                  Text(
-                                    'Aguardando conexões remotas...',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.green,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.green.withOpacity(0.5),
-                                    blurRadius: 6,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      
-                      SizedBox(height: 25),
-                      
-                      // Card do ID do servidor - integrado com dados reais
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Color(0xFF667eea).withOpacity(0.1),
-                              Color(0xFF764ba2).withOpacity(0.1),
-                            ],
-                          ),
-                          border: Border.all(
-                            color: Color(0xFF2F65BA).withOpacity(0.3),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFF2F65BA).withOpacity(0.1),
-                              blurRadius: 15,
-                              offset: Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(25),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFF2F65BA),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.computer,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  SizedBox(width: 15),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'ID do Dispositivo',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFF2F65BA),
-                                          ),
-                                        ),
-                                        Text(
-                                          'Toque para copiar',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              
-                              SizedBox(height: 20),
-                              
-                              // ID real do servidor
-                              GestureDetector(
-                                onTap: () {
-                                  Clipboard.setData(ClipboardData(text: model.serverId.text));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('ID copiado para a área de transferência'),
-                                      backgroundColor: Color(0xFF4CAF50),
-                                      duration: Duration(seconds: 2),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(
-                                      color: Color(0xFF2F65BA).withOpacity(0.2),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    model.serverId.text.isNotEmpty ? model.serverId.text : 'Carregando...',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 3,
-                                      color: Theme.of(context).textTheme.titleLarge?.color,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      
-                      SizedBox(height: 25),
-                      
-                      // Card da senha - integrado com dados reais
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Color(0xFFf093fb).withOpacity(0.1),
-                              Color(0xFFf5576c).withOpacity(0.1),
-                            ],
-                          ),
-                          border: Border.all(
-                            color: Color(0xFFf5576c).withOpacity(0.3),
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color(0xFFf5576c).withOpacity(0.1),
-                              blurRadius: 15,
-                              offset: Offset(0, 8),
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(25),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Color(0xFFf5576c),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.lock,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  SizedBox(width: 15),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Senha de Acesso',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xFFf5576c),
-                                          ),
-                                        ),
-                                        Text(
-                                          'Toque para copiar',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  // Botão de atualizar senha
-                                  GestureDetector(
-                                    onTap: () => bind.mainUpdateTemporaryPassword(),
-                                    child: Container(
-                                      padding: EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        color: Color(0xFFf5576c).withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Icon(
-                                        Icons.refresh,
-                                        color: Color(0xFFf5576c),
-                                        size: 20,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              
-                              SizedBox(height: 20),
-                              
-                              // Senha real do servidor
-                              GestureDetector(
-                                onTap: () {
-                                  Clipboard.setData(ClipboardData(text: model.serverPasswd.text));
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Senha copiada para a área de transferência'),
-                                      backgroundColor: Color(0xFFf5576c),
-                                      duration: Duration(seconds: 2),
-                                    ),
-                                  );
-                                },
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(15),
-                                    border: Border.all(
-                                      color: Color(0xFFf5576c).withOpacity(0.2),
-                                    ),
-                                  ),
-                                  child: Text(
-                                    model.serverPasswd.text.isNotEmpty ? model.serverPasswd.text : 'Carregando...',
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 4,
-                                      color: Theme.of(context).textTheme.titleLarge?.color,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      
-                      SizedBox(height: 30),
-                      
-                      // Informações da empresa
-                      Container(
-                        margin: EdgeInsets.symmetric(horizontal: 5),
-                        padding: EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          gradient: LinearGradient(
-                            colors: [
-                              Color(0xFF667eea).withOpacity(0.1),
-                              Color(0xFF764ba2).withOpacity(0.1),
-                            ],
-                          ),
-                          border: Border.all(
-                            color: Color(0xFF667eea).withOpacity(0.3),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Color(0xFF667eea),
-                              size: 24,
-                            ),
-                            SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Este dispositivo está configurado para receber conexões remotas da de Bruin SISTEMAS.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0xFF667eea),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+
+  Widget _buildStatusCard() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF4CAF50).withOpacity(0.1), Color(0xFF8BC34A).withOpacity(0.1)]),
+        border: Border.all(color: Color(0xFF4CAF50).withOpacity(0.3), width: 2),
+        boxShadow: [BoxShadow(color: Color(0xFF4CAF50).withOpacity(0.1), blurRadius: 15, offset: Offset(0, 8))],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(20),
+        child: Row(
+          children: [
+            Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: Color(0xFF4CAF50), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.security, color: Colors.white, size: 24)),
+            SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Servidor Ativo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
+                  Text('Aguardando conexões remotas...', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                ],
+              ),
+            ),
+            Container(width: 12, height: 12, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.green, boxShadow: [BoxShadow(color: Colors.green.withOpacity(0.5), blurRadius: 6, spreadRadius: 2)])),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIDCard(BuildContext context, ServerModel model) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF667eea).withOpacity(0.1), Color(0xFF764ba2).withOpacity(0.1)]),
+        border: Border.all(color: Color(0xFF2F65BA).withOpacity(0.3), width: 2),
+        boxShadow: [BoxShadow(color: Color(0xFF2F65BA).withOpacity(0.1), blurRadius: 15, offset: Offset(0, 8))],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(25),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: Color(0xFF2F65BA), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.computer, color: Colors.white, size: 24)),
+                SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('ID do Dispositivo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF2F65BA))),
+                      Text('Toque para copiar', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
                     ],
                   ),
                 ),
+              ],
+            ),
+            SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: model.serverId.text));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('ID copiado para a área de transferência'), backgroundColor: Color(0xFF4CAF50), duration: Duration(seconds: 2)));
+              },
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Color(0xFF2F65BA).withOpacity(0.2)),
+                ),
+                child: Text(
+                  model.serverId.text.isNotEmpty ? model.serverId.text : 'Carregando...',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 3, color: Theme.of(context).textTheme.titleLarge?.color),
+                  textAlign: TextAlign.center,
+                ),
               ),
-            );
-          },
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPasswordCard(BuildContext context, ServerModel model) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFFf093fb).withOpacity(0.1), Color(0xFFf5576c).withOpacity(0.1)]),
+        border: Border.all(color: Color(0xFFf5576c).withOpacity(0.3), width: 2),
+        boxShadow: [BoxShadow(color: Color(0xFFf5576c).withOpacity(0.1), blurRadius: 15, offset: Offset(0, 8))],
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(25),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(padding: EdgeInsets.all(12), decoration: BoxDecoration(color: Color(0xFFf5576c), borderRadius: BorderRadius.circular(12)), child: Icon(Icons.lock, color: Colors.white, size: 24)),
+                SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Senha de Acesso', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFf5576c))),
+                      Text('Toque para copiar', style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => bind.mainUpdateTemporaryPassword(),
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(color: Color(0xFFf5576c).withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+                    child: Icon(Icons.refresh, color: Color(0xFFf5576c), size: 20),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: model.serverPasswd.text));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Senha copiada para a área de transferência'), backgroundColor: Color(0xFFf5576c), duration: Duration(seconds: 2)));
+              },
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: Color(0xFFf5576c).withOpacity(0.2)),
+                ),
+                child: Text(
+                  model.serverPasswd.text.isNotEmpty ? model.serverPasswd.text : 'Carregando...',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 4, color: Theme.of(context).textTheme.titleLarge?.color),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 5),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        gradient: LinearGradient(colors: [Color(0xFF667eea).withOpacity(0.1), Color(0xFF764ba2).withOpacity(0.1)]),
+        border: Border.all(color: Color(0xFF667eea).withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: Color(0xFF667eea), size: 24),
+          SizedBox(width: 12),
+          Expanded(child: Text('Este dispositivo está configurado para receber conexões remotas da de Bruin SISTEMAS.', style: TextStyle(fontSize: 14, color: Color(0xFF667eea), fontWeight: FontWeight.w500))),
+        ],
       ),
     );
   }
 }
 
 class WebHomePage extends StatelessWidget {
-  // REMOVIDO: ConnectionPage - apenas configurações
   @override
   Widget build(BuildContext context) {
     stateGlobal.isInMainPage = true;
@@ -1262,159 +533,45 @@ class WebHomePage extends StatelessWidget {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  'assets/images/de Bruin_remote_access_logo.jpg',
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            Container(width: 32, height: 32, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), boxShadow: [BoxShadow(color: Colors.white.withOpacity(0.3), blurRadius: 6, spreadRadius: 1)]), child: ClipRRect(borderRadius: BorderRadius.circular(8), child: Image.asset('assets/images/debruin_remote_access_logo.jpg', fit: BoxFit.cover))),
             SizedBox(width: 10),
             Text("de Bruin SISTEMAS - Web Server"),
           ],
         ),
         actions: [const WebSettingsPage()],
       ),
-      body: ChangeNotifierProvider.value(
-        value: gFFI.serverModel,
-        child: Consumer<ServerModel>(
-          builder: (context, model, child) {
-            return Center(
-              child: Container(
-                constraints: BoxConstraints(maxWidth: 600),
-                padding: EdgeInsets.all(20),
+      body: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 600),
+          padding: EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 150, height: 150,
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF667eea).withOpacity(0.2), Color(0xFF764ba2).withOpacity(0.2)]), border: Border.all(color: Color(0xFF2F65BA).withOpacity(0.3), width: 2)),
+                child: Padding(padding: EdgeInsets.all(15), child: ClipRRect(borderRadius: BorderRadius.circular(15), child: Image.asset('assets/images/debruin_remote_access_logo.jpg', fit: BoxFit.contain))),
+              ),
+              SizedBox(height: 30),
+              Text('de Bruin SISTEMAS', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFF2F65BA))),
+              SizedBox(height: 10),
+              Text('Servidor Web - Acesso Remoto', style: TextStyle(fontSize: 18, color: Color(0xFF667eea), fontWeight: FontWeight.w500)),
+              SizedBox(height: 40),
+              Container(
+                padding: EdgeInsets.all(25),
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), gradient: LinearGradient(colors: [Color(0xFF4CAF50).withOpacity(0.1), Color(0xFF8BC34A).withOpacity(0.1)]), border: Border.all(color: Color(0xFF4CAF50).withOpacity(0.3), width: 2)),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Logo Web
-                    Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF667eea).withOpacity(0.2),
-                            Color(0xFF764ba2).withOpacity(0.2),
-                          ],
-                        ),
-                        border: Border.all(
-                          color: Color(0xFF2F65BA).withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(15),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(15),
-                          child: Image.asset(
-                            'assets/images/de Bruin_remote_access_logo.jpg',
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                      ),
-                    ),
-                    
-                    SizedBox(height: 30),
-                    
-                    Text(
-                      'de Bruin SISTEMAS',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2F65BA),
-                      ),
-                    ),
-                    
-                    SizedBox(height: 10),
-                    
-                    Text(
-                      'Servidor Web - Acesso Remoto',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Color(0xFF667eea),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    
-                    SizedBox(height: 40),
-                    
-                    // Card de informações do servidor web
-                    Container(
-                      padding: EdgeInsets.all(25),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xFF4CAF50).withOpacity(0.1),
-                            Color(0xFF8BC34A).withOpacity(0.1),
-                          ],
-                        ),
-                        border: Border.all(
-                          color: Color(0xFF4CAF50).withOpacity(0.3),
-                          width: 2,
-                        ),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.security,
-                                color: Color(0xFF4CAF50),
-                                size: 28,
-                              ),
-                              SizedBox(width: 12),
-                              Text(
-                                'Servidor Ativo',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF4CAF50),
-                                ),
-                              ),
-                            ],
-                          ),
-                          
-                          SizedBox(height: 20),
-                          
-                          Text(
-                            'Este é o servidor web da de Bruin SISTEMAS. Para acesso remoto completo, utilize nosso aplicativo dedicado.',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[700],
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(Icons.security, color: Color(0xFF4CAF50), size: 28), SizedBox(width: 12), Text('Servidor Ativo', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50)))]),
+                    SizedBox(height: 20),
+                    Text('Este é o servidor web da de Bruin SISTEMAS. Para acesso remoto completo, utilize nosso aplicativo dedicado.', style: TextStyle(fontSize: 16, color: Colors.grey[700]), textAlign: TextAlign.center),
                   ],
                 ),
               ),
-            );
-          },
+            ],
+          ),
         ),
       ),
     );
   }
-
-  // REMOVIDO: handleUnilink - sem funcionalidade de conexão
 }
