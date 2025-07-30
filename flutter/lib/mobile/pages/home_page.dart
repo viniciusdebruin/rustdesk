@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/mobile/pages/server_page.dart';
 import 'package:flutter_hbb/mobile/pages/settings_page.dart';
@@ -12,10 +13,18 @@ import '../../models/state_model.dart';
 import '../../models/server_model.dart';
 import 'connection_page.dart';
 
-abstract class PageShape extends Widget {
-  final String title = "";
-  final Widget icon = Icon(null);
-  final List<Widget> appBarActions = [];
+abstract class PageShape extends StatelessWidget {
+  String get title => "";
+  Widget get icon => Icon(null);
+  List<Widget> get appBarActions => [];
+  
+  // ✅ MUDANDO PARA buildPage() EM VEZ DE build()
+  Widget buildPage(BuildContext context);
+  
+  @override
+  Widget build(BuildContext context) {
+    return buildPage(context);
+  }
 }
 
 class HomePage extends StatefulWidget {
@@ -40,6 +49,12 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late AnimationController _gradientController;
   late Animation<double> _logoAnimation;
   late Animation<double> _gradientAnimation;
+
+  // ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 1
+  @override
+  Widget buildPage(BuildContext context) {
+    return Container(); // ou a UI correta
+  }
 
   void refreshPages() {
     setState(() {
@@ -89,27 +104,32 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _pages.add(EpicServerPage());
 
     // Chat para comunicação durante acesso remoto
-    if (isAndroid && !bind.isOutgoingOnly()) {
-      _chatPageTabIndex = _pages.length;
-      _pages.add(ChatPage(type: ChatPageType.mobileMain));
+    try {
+      if (isAndroid && !bind.isOutgoingOnly()) {
+        _chatPageTabIndex = _pages.length;
+        _pages.add(ChatPageWrapper());
+      }
+    } catch (e) {
+      // Fallback se as dependências não estiverem disponíveis
+      print("Chat não disponível: $e");
     }
 
     // Configurações
-    _pages.add(SettingsPage());
+    _pages.add(SettingsPageWrapper());
   }
 
   @override
-  Widget buildPage(BuildContext context) {
+  Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         if (_selectedIndex != 0) {
           setState(() {
             _selectedIndex = 0;
           });
+          return false;
         } else {
           return true;
         }
-        return false;
       },
       child: Scaffold(
         body: AnimatedBuilder(
@@ -248,11 +268,15 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
               if (_selectedIndex != index) {
                 _selectedIndex = index;
                 if (isChatPageCurrentTab) {
-                  gFFI.chatModel.hideChatIconOverlay();
-                  gFFI.chatModel.hideChatWindowOverlay();
-                  gFFI.chatModel.mobileClearClientUnread(
-                    gFFI.chatModel.currentKey.connId,
-                  );
+                  try {
+                    gFFI.chatModel.hideChatIconOverlay();
+                    gFFI.chatModel.hideChatWindowOverlay();
+                    gFFI.chatModel.mobileClearClientUnread(
+                      gFFI.chatModel.currentKey.connId,
+                    );
+                  } catch (e) {
+                    print("Erro ao gerenciar chat: $e");
+                  }
                 }
               }
             }),
@@ -261,55 +285,61 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget appTitle() {
-    final currentUser = gFFI.chatModel.currentUser;
-    final currentKey = gFFI.chatModel.currentKey;
-    if (isChatPageCurrentTab &&
-        currentUser != null &&
-        currentKey.peerId.isNotEmpty) {
-      final connected = gFFI.serverModel.clients.any(
-        (e) => e.id == currentKey.connId,
-      );
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Tooltip(
-            message:
+    try {
+      final currentUser = gFFI.chatModel.currentUser;
+      final currentKey = gFFI.chatModel.currentKey;
+      if (isChatPageCurrentTab &&
+          currentUser != null &&
+          currentKey.peerId.isNotEmpty) {
+        final connected = gFFI.serverModel.clients.any(
+          (e) => e.id == currentKey.connId,
+        );
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Tooltip(
+              message:
+                  currentKey.isOut
+                      ? translate('Outgoing connection')
+                      : translate('Incoming connection'),
+              child: Icon(
                 currentKey.isOut
-                    ? translate('Outgoing connection')
-                    : translate('Incoming connection'),
-            child: Icon(
-              currentKey.isOut
-                  ? Icons.call_made_rounded
-                  : Icons.call_received_rounded,
-              color: Colors.white,
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "${currentUser.firstName}   ${currentUser.id}",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  if (connected)
-                    // Este é o círculo verde, mantido para indicar conexão ativa
-                    Container(
-                      width: 10,
-                      height: 10,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color.fromARGB(255, 133, 246, 199),
-                      ),
-                    ).marginSymmetric(horizontal: 2),
-                ],
+                    ? Icons.call_made_rounded
+                    : Icons.call_received_rounded,
+                color: Colors.white,
               ),
             ),
-          ),
-        ],
-      );
+            Expanded(
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "${currentUser.firstName}   ${currentUser.id}",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    if (connected)
+                      // Este é o círculo verde, mantido para indicar conexão ativa
+                      Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color.fromARGB(255, 133, 246, 199),
+                        ),
+                      ).marginSymmetric(horizontal: 2),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    } catch (e) {
+      // Fallback para erro
+      print("Erro ao obter informações do chat: $e");
     }
+    
     // Este é o bloco padrão para o logo da deBruin SISTEMAS quando não é a página de chat
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -367,13 +397,51 @@ class HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
 class EpicServerPage extends PageShape {
   @override
-  final String title = "deBruin Server";
+  String get title => "deBruin Server";
+  
   @override
-  final Widget icon = Icon(Icons.security_rounded);
+  Widget get icon => Icon(Icons.security_rounded);
+  
+  @override
+  List<Widget> get appBarActions => [];
 
+  // ✅ REMOVENDO build() E MANTENDO APENAS buildPage() CONFORME IMAGEM 2
   @override
   Widget buildPage(BuildContext context) {
     return EpicServerPageContent();
+  }
+}
+
+// Wrapper classes para ChatPage e SettingsPage
+class ChatPageWrapper extends PageShape {
+  @override
+  String get title => "Chat";
+  
+  @override
+  Widget get icon => Icon(Icons.chat);
+  
+  @override
+  List<Widget> get appBarActions => [];
+
+  @override
+  Widget buildPage(BuildContext context) {
+    return ChatPage(type: ChatPageType.mobileMain);
+  }
+}
+
+class SettingsPageWrapper extends PageShape {
+  @override
+  String get title => "Configurações";
+  
+  @override
+  Widget get icon => Icon(Icons.settings);
+  
+  @override
+  List<Widget> get appBarActions => [];
+
+  @override
+  Widget buildPage(BuildContext context) {
+    return SettingsPage();
   }
 }
 
@@ -386,6 +454,12 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
     with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+
+  // ✅ MÉTODO OBRIGATÓRIO CONFORME IMAGEM 3
+  @override
+  Widget buildPage(BuildContext context) {
+    return build(context); // ou Container();
+  }
 
   @override
   void initState() {
@@ -407,7 +481,7 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
   }
 
   @override
-  Widget buildPage(BuildContext context) {
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: ChangeNotifierProvider.value(
@@ -508,7 +582,6 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
                     SizedBox(height: 30),
 
                     // Card de status do servidor
-                    // Este é o bloco que foi movido e corrigido!
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 5),
                       decoration: BoxDecoration(
@@ -871,7 +944,17 @@ class _EpicServerPageContentState extends State<EpicServerPageContent>
   }
 }
 
-class WebHomePage extends StatelessWidget {
+class WebHomePage extends PageShape {
+  @override
+  String get title => "Web Home";
+  
+  @override
+  Widget get icon => Icon(Icons.web);
+  
+  @override
+  List<Widget> get appBarActions => [const WebSettingsPage()];
+
+  // ✅ IMPLEMENTANDO buildPage() EM VEZ DE build() CONFORME IMAGEM 4
   @override
   Widget buildPage(BuildContext context) {
     stateGlobal.isInMainPage = true;
@@ -969,8 +1052,7 @@ class WebHomePage extends StatelessWidget {
 
               SizedBox(height: 40),
 
-              // Este é o bloco de "Servidor Ativo" que estava causando o problema
-              // Foi movido para EpicServerPageContent para ser um card completo
+              // Card de status do servidor web
               Container(
                 padding: EdgeInsets.all(25),
                 decoration: BoxDecoration(
@@ -1018,11 +1100,9 @@ class WebHomePage extends StatelessWidget {
                   ],
                 ),
               ),
-              // FIM do bloco movido
             ],
           ),
         ),
       ),
     );
   }
-}
